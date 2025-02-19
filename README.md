@@ -12,10 +12,10 @@ These precompiled binaries are designed for easy integration into (y)our scripts
 The binaries are built for multiple operating systems and architectures:
 
 ### ODR-PadEnc
-- Debian (Bookworm)
+- Debian 12 (Bookworm)
   - AMD64
   - ARM64
-- Ubuntu 24.04
+- Ubuntu 24.04 LTS
   - AMD64
   - ARM64
 - Alpine 3.21
