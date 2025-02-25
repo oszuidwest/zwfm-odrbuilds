@@ -41,9 +41,10 @@ jobs:
             arch: "amd64" #GitHub Runners doens't support building on Alpine yet "JavaScript Actions in Alpine containers are only supported on x64 Linux runners. Detected Linux Arm64"
             runner: "ubuntu-24.04"
     env:
-      VERSION: "v3.0.0"
+      VERSION: "v3.1.0"
       URL_BASE: "https://github.com/Opendigitalradio"
-      SOFTWARE: "ODR-PadEnc/archive/refs/tags"
+      SOFTWARE: "ODR-PadEnc"
+      BRANCH: "next"
     steps:
       - name: Install dependencies
         run: |
@@ -51,19 +52,18 @@ jobs:
             apk add --no-cache \
               build-base automake autoconf libtool \
               imagemagick-dev \
-              curl
+              curl git
           else
             apt-get update && apt-get install -y --no-install-recommends \
               build-essential automake libtool \
               libmagickwand-dev \
-              ca-certificates curl && \
+              ca-certificates curl git && \
             apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
           fi
       
-      - name: Download and extract ODR-PadEnc tarball
+      - name: Clone ODR-PadEnc from next branch
         run: |
-          curl -L ${URL_BASE}/${SOFTWARE}/${VERSION}.tar.gz | tar -xz
-          mv ODR-PadEnc* ODR-PadEnc
+          git clone --depth 1 --branch ${BRANCH} ${URL_BASE}/${SOFTWARE}.git
       
       - name: Build ODR-PadEnc
         working-directory: ODR-PadEnc
@@ -223,7 +223,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_padenc
     env:
-      VERSION: "v3.0.0"
+      VERSION: "v3.1.0"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
