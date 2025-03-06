@@ -3,11 +3,6 @@ name: Build and Release ODR Artifacts
 on:
   workflow_dispatch:
 
-# Add top-level permissions
-permissions:
-  contents: write
-  actions: write
-
 jobs:
   ##################################
   # Build Jobs
