@@ -3,11 +3,6 @@ name: Build and Release ODR Artifacts
 on:
   workflow_dispatch:
 
-# Add top-level permissions
-permissions:
-  contents: write
-  actions: write
-
 jobs:
   ##################################
   # Build Jobs
@@ -152,7 +147,7 @@ jobs:
             runner: "ubuntu-24.04"
             build: full
     env:
-      VERSION: "v3.6.0"
+      VERSION: "v3.4.0"
       URL_BASE: "https://github.com/Opendigitalradio"
       SOFTWARE: "ODR-AudioEnc/archive/refs/tags"
     steps:
