@@ -1,6 +1,6 @@
 # ZuidWest FM ODR Builds
 This repository contains tooling to automate the building and releasing of binaries for the [Open Digital Radio](https://github.com/opendigitalradio) tools:
-- **ODR-PadEnc** (v3.0.0)
+- **ODR-PadEnc** (v3.1.0)
 - **ODR-AudioEnc** (v3.6.0)
   - Minimal build (only piped input)
   - Full build (ASLA, Jack, GStreamer and VLC support)
