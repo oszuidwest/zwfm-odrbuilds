@@ -52,3 +52,31 @@ Note: ARM64 builds are not available for Alpine due to current limitations in Gi
    - Similarly, download **ODR-AudioEnc** using its corresponding asset name.
 
 Feel free to integrate these binaries into your projects and scripts for efficient deployment!
+
+## Using Docker Images
+
+Pre-built Docker images are available for all variants on Debian with AMD64 and ARM64 support:
+
+### Docker Image List
+- **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`
+- **ODR-AudioEnc (Minimal)**: `ghcr.io/oszuidwest/odr-audioenc-minimal:latest`
+- **ODR-AudioEnc (Full)**: `ghcr.io/oszuidwest/odr-audioenc-full:latest`
+
+### Usage Examples
+
+```bash
+# Run ODR-PadEnc
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:latest --help
+
+# Run ODR-AudioEnc (minimal build)
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-minimal:latest --help
+
+# Run ODR-AudioEnc (full build)
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-full:latest --help
+```
+
+You can also specify a specific version tag instead of `latest` for reproducible setups:
+
+```bash
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0
+```
