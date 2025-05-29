@@ -3,6 +3,9 @@ name: Build and Release ODR Artifacts
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
 
   ##################################
@@ -264,6 +267,9 @@ jobs:
     name: Create GitHub Release for ODR-PadEnc
     runs-on: ubuntu-24.04
     needs: build_padenc
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -319,6 +325,9 @@ jobs:
     name: Create GitHub Release for ODR-AudioEnc
     runs-on: ubuntu-24.04
     needs: build_audioenc
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
