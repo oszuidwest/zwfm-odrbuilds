@@ -262,7 +262,7 @@ jobs:
   ##################################
   release_padenc:
     name: Create GitHub Release for ODR-PadEnc
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build_padenc
     steps:
       - name: Checkout repository
@@ -317,7 +317,7 @@ jobs:
 
   release_audioenc:
     name: Create GitHub Release for ODR-AudioEnc
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build_audioenc
     steps:
       - name: Checkout repository
