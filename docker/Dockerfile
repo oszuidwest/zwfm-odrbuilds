@@ -54,7 +54,7 @@ RUN if [ "$TOOL" = "odr-padenc" ]; then \
 COPY --from=downloader /download/${TOOL} /usr/local/bin/
 
 # Set entrypoint dynamically
-RUN echo '#!/bin/sh\nexec /usr/local/bin/'${TOOL}' "$@"' > /entrypoint.sh && \
+RUN printf '#!/bin/sh\nexec /usr/local/bin/%s "$@"\n' "${TOOL}" > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -14,7 +14,7 @@ jobs:
       contents: read
       packages: write
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-    
+
     strategy:
       matrix:
         include:
@@ -31,28 +31,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Load environment variables
         id: env
         run: |
-          # Source .env file and export to GitHub environment
+          # Source build.env file and export to GitHub environment
           set -a
-          source .env
+          . ./build.env
           set +a
-          
+
           # Export to GitHub environment for use in subsequent steps
-          echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
-          echo "ORGANIZATION=$ORGANIZATION" >> $GITHUB_ENV
-          echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION" >> $GITHUB_ENV
-          echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION" >> $GITHUB_ENV
-          
+          {
+            echo "REGISTRY=$REGISTRY"
+            echo "ORGANIZATION=$ORGANIZATION"
+            echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
+            echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
+          } >> "$GITHUB_ENV"
+
           # Set version based on tool
           if [ "${{ matrix.tool }}" = "odr-padenc" ]; then
-            echo "VERSION=$ODR_PADENC_VERSION" >> $GITHUB_ENV
+            echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
           else
-            echo "VERSION=$ODR_AUDIOENC_VERSION" >> $GITHUB_ENV
+            echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
           fi
 
       - name: Set up QEMU
@@ -77,7 +77,8 @@ jobs:
             type=semver,pattern={{version}},value=${{ env.VERSION }}
             type=raw,value=latest
           labels: |
-            org.opencontainers.image.title=${{ matrix.tool }}${{ matrix.variant && format(' ({0})', matrix.variant) || '' }}
+            org.opencontainers.image.title=${{ matrix.tool }}${{
+              matrix.variant && format(' ({0})', matrix.variant) || '' }}
             org.opencontainers.image.description=ODR tool for DAB+ broadcasting
 
       - name: Build and push Docker image

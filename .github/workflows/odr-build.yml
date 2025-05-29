@@ -7,7 +7,6 @@ permissions:
   contents: read
 
 jobs:
-
   ##################################
   # Build Jobs
   ##################################
@@ -40,26 +39,28 @@ jobs:
             arch: "amd64"
             runner: "ubuntu-24.04"
     steps:
-      - name: Checkout repository (for .env file)
+      - name: Checkout repository (for build.env file)
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            .env
+            build.env
           sparse-checkout-cone-mode: false
-      
+
       - name: Load configuration
         run: |
-          # Source .env file
+          # Source build.env file
           set -a
-          source .env
+          . ./build.env
           set +a
-          
+
           # Export to environment
-          echo "VERSION=$ODR_PADENC_VERSION" >> $GITHUB_ENV
-          echo "BRANCH=$ODR_PADENC_BRANCH" >> $GITHUB_ENV
-          echo "URL_BASE=https://github.com/Opendigitalradio" >> $GITHUB_ENV
-          echo "SOFTWARE=ODR-PadEnc" >> $GITHUB_ENV
-      
+          {
+            echo "VERSION=$ODR_PADENC_VERSION"
+            echo "BRANCH=$ODR_PADENC_BRANCH"
+            echo "URL_BASE=https://github.com/Opendigitalradio"
+            echo "SOFTWARE=ODR-PadEnc"
+          } >> "$GITHUB_ENV"
+
       - name: Install dependencies
         run: |
           if [ "${{ matrix.os }}" = "alpine" ]; then
@@ -74,29 +75,29 @@ jobs:
               ca-certificates curl git && \
             apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
           fi
-      
+
       - name: Download or clone ODR-PadEnc
         run: |
           # Check if BRANCH starts with 'v' (indicating a version tag)
           if [[ "${BRANCH}" =~ ^v[0-9] ]]; then
             echo "Downloading tag ${BRANCH}"
             curl -L "${URL_BASE}/${SOFTWARE}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
-            mv ODR-PadEnc* ODR-PadEnc
+            mv ODR-PadEnc-* ODR-PadEnc
           else
             echo "Cloning branch ${BRANCH}"
             git clone --depth 1 --branch "${BRANCH}" "${URL_BASE}/${SOFTWARE}.git"
           fi
-      
+
       - name: Build ODR-PadEnc
         working-directory: ODR-PadEnc
         run: |
           ./bootstrap
           ./configure
-          make -j$(nproc)
-      
+          make -j"$(nproc)"
+
       - name: Prepare output directory
         run: mkdir -p output
-      
+
       - name: Copy built binary to output directory
         working-directory: ODR-PadEnc
         run: |
@@ -108,7 +109,7 @@ jobs:
           else
             echo "Build failed: executable not found!" && exit 1
           fi
-      
+
       - name: Upload ODR-PadEnc Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -174,26 +175,28 @@ jobs:
             runner: "ubuntu-24.04"
             build: full
     steps:
-      - name: Checkout repository (for .env file)
+      - name: Checkout repository (for build.env file)
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            .env
+            build.env
           sparse-checkout-cone-mode: false
-      
+
       - name: Load configuration
         run: |
-          # Source .env file
+          # Source build.env file
           set -a
-          source .env
+          . ./build.env
           set +a
-          
+
           # Export to environment
-          echo "VERSION=$ODR_AUDIOENC_VERSION" >> $GITHUB_ENV
-          echo "BRANCH=$ODR_AUDIOENC_BRANCH" >> $GITHUB_ENV
-          echo "URL_BASE=https://github.com/Opendigitalradio" >> $GITHUB_ENV
-          echo "SOFTWARE=ODR-AudioEnc" >> $GITHUB_ENV
-      
+          {
+            echo "VERSION=$ODR_AUDIOENC_VERSION"
+            echo "BRANCH=$ODR_AUDIOENC_BRANCH"
+            echo "URL_BASE=https://github.com/Opendigitalradio"
+            echo "SOFTWARE=ODR-AudioEnc"
+          } >> "$GITHUB_ENV"
+
       - name: Install dependencies
         run: |
           if [ "${{ matrix.os }}" = "alpine" ]; then
@@ -215,19 +218,19 @@ jobs:
               libcurl4-openssl-dev ca-certificates curl git && \
             apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
           fi
-      
+
       - name: Download or clone ODR-AudioEnc
         run: |
           # Check if BRANCH starts with 'v' (indicating a version tag)
           if [[ "${BRANCH}" =~ ^v[0-9] ]]; then
             echo "Downloading tag ${BRANCH}"
             curl -L "${URL_BASE}/${SOFTWARE}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
-            mv ODR-AudioEnc* ODR-AudioEnc
+            mv ODR-AudioEnc-* ODR-AudioEnc
           else
             echo "Cloning branch ${BRANCH}"
             git clone --depth 1 --branch "${BRANCH}" "${URL_BASE}/${SOFTWARE}.git"
           fi
-      
+
       - name: Build ODR-AudioEnc
         working-directory: ODR-AudioEnc
         run: |
@@ -237,11 +240,11 @@ jobs:
           else
             ./configure
           fi
-          make -j$(nproc)
-      
+          make -j"$(nproc)"
+
       - name: Prepare output directory
         run: mkdir -p output
-      
+
       - name: Copy built binary to output directory
         working-directory: ODR-AudioEnc
         run: |
@@ -253,7 +256,7 @@ jobs:
           else
             echo "Build failed: executable not found!" && exit 1
           fi
-      
+
       - name: Upload ODR-AudioEnc Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -276,26 +279,26 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Load version
         run: |
-          # Source .env file
+          # Source build.env file
           set -a
-          source .env
+          . ./build.env
           set +a
-          
-          echo "VERSION=$ODR_PADENC_VERSION" >> $GITHUB_ENV
+
+          echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
 
       - name: Create tag if it doesn't exist
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          if git rev-parse odr-padenc-${{ env.VERSION }} >/dev/null 2>&1; then
+          if git rev-parse "odr-padenc-${{ env.VERSION }}" >/dev/null 2>&1; then
             echo "Tag odr-padenc-${{ env.VERSION }} already exists."
           else
             echo "Creating tag odr-padenc-${{ env.VERSION }}."
-            git tag odr-padenc-${{ env.VERSION }}
-            git push origin odr-padenc-${{ env.VERSION }}
+            git tag "odr-padenc-${{ env.VERSION }}"
+            git push origin "odr-padenc-${{ env.VERSION }}"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -334,26 +337,26 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Load version
         run: |
-          # Source .env file
+          # Source build.env file
           set -a
-          source .env
+          . ./build.env
           set +a
-          
-          echo "VERSION=$ODR_AUDIOENC_VERSION" >> $GITHUB_ENV
+
+          echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
 
       - name: Create tag if it doesn't exist
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          if git rev-parse odr-audioenc-${{ env.VERSION }} >/dev/null 2>&1; then
+          if git rev-parse "odr-audioenc-${{ env.VERSION }}" >/dev/null 2>&1; then
             echo "Tag odr-audioenc-${{ env.VERSION }} already exists."
           else
             echo "Creating tag odr-audioenc-${{ env.VERSION }}."
-            git tag odr-audioenc-${{ env.VERSION }}
-            git push origin odr-audioenc-${{ env.VERSION }}
+            git tag "odr-audioenc-${{ env.VERSION }}"
+            git push origin "odr-audioenc-${{ env.VERSION }}"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
