@@ -6,30 +6,60 @@ on:
     branches: [ main ]
     paths:
       - 'docker/**'
+      - '.github/workflows/docker-build.yml'
+      - '.env'
   workflow_run:
     workflows: ["Build and Release ODR Artifacts"]
     types:
       - completed
 
-env:
-  REGISTRY: ghcr.io
-  ORGANIZATION: oszuidwest
-  PADENC_VERSION: v3.1.0
-  AUDIOENC_VERSION: v3.6.0
-
 jobs:
-  build-docker-padenc:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    
+    strategy:
+      matrix:
+        include:
+          - tool: odr-padenc
+            variant: ""
+            image_name: odr-padenc
+          - tool: odr-audioenc
+            variant: minimal
+            image_name: odr-audioenc-minimal
+          - tool: odr-audioenc
+            variant: full
+            image_name: odr-audioenc-full
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+
+      - name: Load environment variables
+        id: env
+        run: |
+          # Source .env file and export to GitHub environment
+          set -a
+          source .env
+          set +a
+          
+          # Export to GitHub environment for use in subsequent steps
+          echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
+          echo "ORGANIZATION=$ORGANIZATION" >> $GITHUB_ENV
+          echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION" >> $GITHUB_ENV
+          echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION" >> $GITHUB_ENV
+          
+          # Set version based on tool
+          if [ "${{ matrix.tool }}" = "odr-padenc" ]; then
+            echo "VERSION=$ODR_PADENC_VERSION" >> $GITHUB_ENV
+          else
+            echo "VERSION=$ODR_AUDIOENC_VERSION" >> $GITHUB_ENV
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -44,119 +74,33 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/odr-padenc
+          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}
           tags: |
-            type=semver,pattern={{version}},value=${{ env.PADENC_VERSION }}
+            type=semver,pattern={{version}},value=${{ env.VERSION }}
             type=raw,value=latest
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=${{ matrix.tool }}${{ matrix.variant && format(' ({0})', matrix.variant) || '' }}
+            org.opencontainers.image.description=ODR tool for DAB+ broadcasting
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/odr-padenc-debian.Dockerfile
+          file: docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: |
-            VERSION=${{ env.PADENC_VERSION }}
+            TOOL=${{ matrix.tool }}
+            VERSION=${{ env.VERSION }}
+            VARIANT=${{ matrix.variant }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ github.sha }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-  build-docker-audioenc-minimal:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/odr-audioenc-minimal
-          tags: |
-            type=semver,pattern={{version}},value=${{ env.AUDIOENC_VERSION }}
-            type=raw,value=latest
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/odr-audioenc-minimal-debian.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            VERSION=${{ env.AUDIOENC_VERSION }}
-            VARIANT=minimal
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  build-docker-audioenc-full:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/odr-audioenc-full
-          tags: |
-            type=semver,pattern={{version}},value=${{ env.AUDIOENC_VERSION }}
-            type=raw,value=latest
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/odr-audioenc-full-debian.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            VERSION=${{ env.AUDIOENC_VERSION }}
-            VARIANT=full
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

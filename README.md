@@ -3,9 +3,9 @@ This repository contains tooling to automate the building and releasing of binar
 - **ODR-PadEnc** (v3.1.0)
 - **ODR-AudioEnc** (v3.6.0)
   - Minimal build (only piped input)
-  - Full build (ASLA, Jack, GStreamer and VLC support)
+  - Full build (ALSA, Jack, GStreamer and VLC support)
 
-These precompiled binaries are designed for easy integration into (y)our scripts or projects. The ODR-PadEnc binary is built with all options enabled, while ODR-AudioEnc is available in two variants: a minimal version that accepts piped input, and a full version that includes additional support for ASLA, Jack, GStreamer, and VLC.
+These precompiled binaries are designed for easy integration into your scripts or projects. The ODR-PadEnc binary is built with all options enabled, while ODR-AudioEnc is available in two variants: a minimal version that accepts piped input, and a full version that includes additional support for ALSA, Jack, GStreamer, and VLC.
 
 ## Operating System Support
 
@@ -31,27 +31,27 @@ The binaries are built for multiple operating systems and architectures:
 - Alpine 3.21
   - AMD64: Minimal and Full builds
 
-Note: ARM64 builds are not available for Alpine due to current limitations in GitHub Actions runners.
+**Note:** ARM64 builds are not available for Alpine due to current limitations in GitHub Actions runners.
 
 ## Using the Prebuilt ODR Tools
-1. **Download from GitHub Releases:**
-   - Visit the [Releases](https://github.com/oszuidwest/zwfm-dabplus/releases) page of this repository.
-   - Locate the asset you need. Each binary follows a naming convention that includes the tool name, version, operating system, and architecture (for example, `odr-padenc-v3.0.0-ubuntu-amd64`).
 
-2. **Integrate into Scripts:**
-   - For example, to download and use **ODR-PadEnc**:
-     ```bash
-     #!/bin/bash
-     # Download ODR-PadEnc binary for Ubuntu amd64
-     wget https://github.com/oszuidwest/zwfm-dabplus/releases/download/odr-padenc-v3.0.0/odr-padenc-v3.0.0-ubuntu-amd64 -O odr-padenc
-     chmod +x odr-padenc
-     
-     # Run the tool
-     ./odr-padenc
-     ```
-   - Similarly, download **ODR-AudioEnc** using its corresponding asset name.
+### Download from GitHub Releases
+Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page of this repository. Each binary follows a naming convention that includes the tool name, version, operating system, and architecture (for example, `odr-padenc-v3.1.0-ubuntu-amd64`).
 
-Feel free to integrate these binaries into your projects and scripts for efficient deployment!
+### Example Integration
+
+```bash
+#!/bin/bash
+# Download ODR-PadEnc binary for Ubuntu amd64
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-ubuntu-amd64 -O odr-padenc
+chmod +x odr-padenc
+
+# Run the tool
+./odr-padenc --help
+```
+
+Similarly, download **ODR-AudioEnc** using its corresponding asset name.
+
 
 ## Using Docker Images
 
@@ -75,8 +75,8 @@ docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-minimal:latest -
 docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-full:latest --help
 ```
 
-You can also specify a specific version tag instead of `latest` for reproducible setups:
+For reproducible setups, specify a version tag instead of `latest`:
 
 ```bash
-docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0 --help
 ```
