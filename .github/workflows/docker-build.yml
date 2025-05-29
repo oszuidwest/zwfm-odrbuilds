@@ -2,12 +2,6 @@ name: Build and Push Docker Images
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-      - 'docker/**'
-      - '.github/workflows/docker-build.yml'
-      - '.env'
   workflow_run:
     workflows: ["Build and Release ODR Artifacts"]
     types:
@@ -19,7 +13,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     
     strategy:
       matrix:
@@ -82,7 +76,6 @@ jobs:
           tags: |
             type=semver,pattern={{version}},value=${{ env.VERSION }}
             type=raw,value=latest
-            type=sha,prefix={{branch}}-
           labels: |
             org.opencontainers.image.title=${{ matrix.tool }}${{ matrix.variant && format(' ({0})', matrix.variant) || '' }}
             org.opencontainers.image.description=ODR tool for DAB+ broadcasting
@@ -104,3 +97,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
