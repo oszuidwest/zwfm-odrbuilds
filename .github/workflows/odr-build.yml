@@ -384,9 +384,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Load version
         run: |
@@ -396,20 +393,6 @@ jobs:
           set +a
 
           echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
-
-      - name: Create tag if it doesn't exist
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          if git rev-parse "odr-padenc-${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Tag odr-padenc-${{ env.VERSION }} already exists."
-          else
-            echo "Creating tag odr-padenc-${{ env.VERSION }}."
-            git tag "odr-padenc-${{ env.VERSION }}"
-            git push origin "odr-padenc-${{ env.VERSION }}"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -442,9 +425,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Load version
         run: |
@@ -454,20 +434,6 @@ jobs:
           set +a
 
           echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
-
-      - name: Create tag if it doesn't exist
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          if git rev-parse "odr-audioenc-${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Tag odr-audioenc-${{ env.VERSION }} already exists."
-          else
-            echo "Creating tag odr-audioenc-${{ env.VERSION }}."
-            git tag "odr-audioenc-${{ env.VERSION }}"
-            git push origin "odr-audioenc-${{ env.VERSION }}"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -500,9 +466,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Load version
         run: |
@@ -512,20 +475,6 @@ jobs:
           set +a
 
           echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
-
-      - name: Create tag if it doesn't exist
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          if git rev-parse "odr-dabmux-${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Tag odr-dabmux-${{ env.VERSION }} already exists."
-          else
-            echo "Creating tag odr-dabmux-${{ env.VERSION }}."
-            git tag "odr-dabmux-${{ env.VERSION }}"
-            git push origin "odr-dabmux-${{ env.VERSION }}"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
