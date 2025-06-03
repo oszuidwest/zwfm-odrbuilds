@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /download
 
 # Construct download URL based on tool type
-RUN if [ "$TOOL" = "odr-padenc" ]; then \
+RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
         BINARY_NAME="${TOOL}-${VERSION}-debian-${TARGETARCH}"; \
     else \
         BINARY_NAME="${TOOL}-${VERSION}-${VARIANT}-debian-${TARGETARCH}"; \
@@ -41,6 +41,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 # Install tool-specific runtime dependencies
 RUN if [ "$TOOL" = "odr-padenc" ]; then \
         apt-get update && apt-get install -y --no-install-recommends libmagickwand-6.q16-6; \
+    elif [ "$TOOL" = "odr-dabmux" ]; then \
+        apt-get update && apt-get install -y --no-install-recommends libzmq5 libboost-system1.81.0 libcurl4; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "minimal" ]; then \
         apt-get update && apt-get install -y --no-install-recommends libzmq5 libcurl4 openssl; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "full" ]; then \

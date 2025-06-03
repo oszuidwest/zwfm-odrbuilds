@@ -27,6 +27,9 @@ jobs:
           - tool: odr-audioenc
             variant: full
             image_name: odr-audioenc-full
+          - tool: odr-dabmux
+            variant: ""
+            image_name: odr-dabmux
 
     steps:
       - name: Checkout repository
@@ -46,13 +49,16 @@ jobs:
             echo "ORGANIZATION=$ORGANIZATION"
             echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
             echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
+            echo "ODR_DABMUX_VERSION=$ODR_DABMUX_VERSION"
           } >> "$GITHUB_ENV"
 
           # Set version based on tool
           if [ "${{ matrix.tool }}" = "odr-padenc" ]; then
             echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
-          else
+          elif [ "${{ matrix.tool }}" = "odr-audioenc" ]; then
             echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
+          else
+            echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
           fi
 
       - name: Set up QEMU

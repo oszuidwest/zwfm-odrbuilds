@@ -263,6 +263,114 @@ jobs:
           name: odr-audioenc-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/odr-audioenc-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
 
+  build_dabmux:
+    name: Build ODR-DabMux Artifact
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      matrix:
+        include:
+          - os: debian
+            image: "debian:bookworm-slim"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+          - os: debian
+            image: "debian:bookworm-slim"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+          - os: ubuntu
+            image: "ubuntu:24.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+          - os: ubuntu
+            image: "ubuntu:24.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+          - os: alpine
+            image: "alpine:3.21"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+    steps:
+      - name: Checkout repository (for build.env file)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
+
+      - name: Load configuration
+        run: |
+          # Source build.env file
+          set -a
+          . ./build.env
+          set +a
+
+          # Export to environment
+          {
+            echo "VERSION=$ODR_DABMUX_VERSION"
+            echo "BRANCH=$ODR_DABMUX_BRANCH"
+            echo "URL_BASE=https://github.com/Opendigitalradio"
+            echo "SOFTWARE=ODR-DabMux"
+          } >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.os }}" = "alpine" ]; then
+            apk add --no-cache \
+              build-base automake autoconf libtool \
+              zeromq-dev \
+              boost-dev \
+              curl-dev curl git
+          else
+            apt-get update && apt-get install -y --no-install-recommends \
+              build-essential automake libtool \
+              libzmq3-dev libzmq5 \
+              libboost-system-dev \
+              libcurl4-openssl-dev ca-certificates curl git && \
+            apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+          fi
+
+      - name: Download or clone ODR-DabMux
+        run: |
+          # Check if BRANCH starts with 'v' (indicating a version tag)
+          if [[ "${BRANCH}" =~ ^v[0-9] ]]; then
+            echo "Downloading tag ${BRANCH}"
+            curl -L "${URL_BASE}/${SOFTWARE}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
+            mv ODR-DabMux-* ODR-DabMux
+          else
+            echo "Cloning branch ${BRANCH}"
+            git clone --depth 1 --branch "${BRANCH}" "${URL_BASE}/${SOFTWARE}.git"
+          fi
+
+      - name: Build ODR-DabMux
+        working-directory: ODR-DabMux
+        run: |
+          ./bootstrap
+          ./configure
+          make -j"$(nproc)"
+
+      - name: Prepare output directory
+        run: mkdir -p output
+
+      - name: Copy built binary to output directory
+        working-directory: ODR-DabMux
+        run: |
+          BINARY_NAME="odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}"
+          if [ -f odr-dabmux ]; then
+            cp odr-dabmux "../output/$BINARY_NAME"
+          elif [ -f src/odr-dabmux ]; then
+            cp src/odr-dabmux "../output/$BINARY_NAME"
+          else
+            echo "Build failed: executable not found!" && exit 1
+          fi
+
+      - name: Upload ODR-DabMux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
+          path: output/odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
+
   ##################################
   # Release Jobs
   ##################################
@@ -380,4 +488,62 @@ jobs:
           files: audioenc/**
           tag_name: odr-audioenc-${{ env.VERSION }}
           name: "ODR-AudioEnc ${{ env.VERSION }}"
+          generate_release_notes: false
+
+  release_dabmux:
+    name: Create GitHub Release for ODR-DabMux
+    runs-on: ubuntu-24.04
+    needs: build_dabmux
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Load version
+        run: |
+          # Source build.env file
+          set -a
+          . ./build.env
+          set +a
+
+          echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
+
+      - name: Create tag if it doesn't exist
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          if git rev-parse "odr-dabmux-${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "Tag odr-dabmux-${{ env.VERSION }} already exists."
+          else
+            echo "Creating tag odr-dabmux-${{ env.VERSION }}."
+            git tag "odr-dabmux-${{ env.VERSION }}"
+            git push origin "odr-dabmux-${{ env.VERSION }}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all_artifacts
+
+      - name: Organize DabMux artifacts
+        run: |
+          mkdir -p dabmux
+          mv all_artifacts/odr-dabmux-* dabmux/ || true
+          ls -l dabmux
+
+      - name: Create DabMux Release and Upload Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dabmux/**
+          tag_name: odr-dabmux-${{ env.VERSION }}
+          name: "ODR-DabMux ${{ env.VERSION }}"
           generate_release_notes: false
