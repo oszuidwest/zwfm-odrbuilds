@@ -346,7 +346,7 @@ jobs:
       - name: Build ODR-DabMux
         working-directory: ODR-DabMux
         run: |
-          ./bootstrap
+          ./bootstrap.sh
           ./configure
           make -j"$(nproc)"
 
