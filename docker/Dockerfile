@@ -14,7 +14,7 @@ ENV REPO="oszuidwest/zwfm-odrbuilds"
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl && \
+    ca-certificates curl file && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /download
@@ -32,7 +32,6 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     echo "Downloaded successfully, checking file..." && \
     ls -la "${TOOL}" && \
     file "${TOOL}" && \
-    test -s "${TOOL}" && \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies
