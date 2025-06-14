@@ -25,7 +25,14 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     else \
         BINARY_NAME="${TOOL}-${VERSION}-${VARIANT}-debian-${TARGETARCH}"; \
     fi && \
-    curl -L -o "${TOOL}" "https://github.com/${REPO}/releases/download/${TOOL}-${VERSION}/${BINARY_NAME}" && \
+    echo "Downloading: ${BINARY_NAME}" && \
+    DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TOOL}-${VERSION}/${BINARY_NAME}" && \
+    echo "From: ${DOWNLOAD_URL}" && \
+    curl -L --fail -o "${TOOL}" "${DOWNLOAD_URL}" && \
+    echo "Downloaded successfully, checking file..." && \
+    ls -la "${TOOL}" && \
+    file "${TOOL}" && \
+    test -s "${TOOL}" && \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies
