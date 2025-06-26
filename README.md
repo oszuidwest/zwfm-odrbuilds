@@ -4,7 +4,7 @@ This repository contains tooling to automate the building and releasing of binar
 - **ODR-AudioEnc** (v3.6.0)
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
-- **ODR-DabMux** (v5.2.0)
+- **ODR-DabMux** (v5.3.0)
 
 These precompiled binaries are designed for easy integration into your scripts or projects. The ODR-PadEnc binary is built with all options enabled, while ODR-AudioEnc is available in two variants: a minimal version that accepts piped input, and a full version that includes additional support for ALSA, Jack, GStreamer, and VLC. ODR-DabMux is built with ZeroMQ, Boost, and cURL support for full functionality.
 
@@ -94,5 +94,5 @@ For reproducible setups, specify a version tag instead of `latest`:
 
 ```bash
 docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0 --help
-docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:v5.2.0 --help
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:v5.3.0 --help
 ```
