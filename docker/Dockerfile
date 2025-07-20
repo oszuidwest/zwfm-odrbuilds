@@ -46,7 +46,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 # Install tool-specific runtime dependencies
 RUN if [ "$TOOL" = "odr-padenc" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libmagickwand-6.q16-6; \
+        apt-get update && apt-get install -y --no-install-recommends libmagickwand-6.q16-6 locales && \
+        sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+        locale-gen; \
     elif [ "$TOOL" = "odr-dabmux" ]; then \
         apt-get update && apt-get install -y --no-install-recommends libzmq5 libboost-system1.81.0 libcurl4; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "minimal" ]; then \
@@ -57,6 +59,11 @@ RUN if [ "$TOOL" = "odr-padenc" ]; then \
             libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 openssl; \
     fi && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN if [ "$TOOL" = "odr-padenc" ]; then \
+        echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
+        echo 'export LC_ALL=en_US.UTF-8' >> /etc/profile; \
+    fi
 
 # Copy the binary from downloader stage
 COPY --from=downloader /download/${TOOL} /usr/local/bin/
