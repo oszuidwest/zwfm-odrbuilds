@@ -21,19 +21,15 @@ jobs:
         include:
           - tool: odr-padenc
             variant: ""
-            os_variant: debian13
             image_name: odr-padenc
           - tool: odr-audioenc
             variant: minimal
-            os_variant: debian13
             image_name: odr-audioenc-minimal
           - tool: odr-audioenc
             variant: full
-            os_variant: debian13
             image_name: odr-audioenc-full
           - tool: odr-dabmux
             variant: ""
-            os_variant: debian13
             image_name: odr-dabmux
 
     steps:
@@ -102,7 +98,6 @@ jobs:
             TOOL=${{ matrix.tool }}
             VERSION=${{ env.VERSION }}
             VARIANT=${{ matrix.variant }}
-            OS_VARIANT=${{ matrix.os_variant }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             VCS_REF=${{ github.sha }}
           push: true

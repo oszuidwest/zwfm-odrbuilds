@@ -1,10 +1,10 @@
 # Build stage for downloading binary
-FROM debian:trixie-slim AS downloader
+FROM debian:bookworm-slim AS downloader
 
 ARG TOOL
 ARG VERSION
 ARG VARIANT=""
-ARG OS_VARIANT=debian13
+ARG OS_VARIANT=debian12
 ARG TARGETARCH
 
 # Validate required args
@@ -36,7 +36,7 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies
-FROM debian:trixie-slim AS runtime
+FROM debian:bookworm-slim AS runtime
 
 ARG TOOL
 ARG VARIANT=""

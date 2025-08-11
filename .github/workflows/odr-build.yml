@@ -19,11 +19,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "amd64"
             runner: "ubuntu-24.04"
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
@@ -133,22 +133,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "amd64"
             runner: "ubuntu-24.04"
             build: full
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "amd64"
             runner: "ubuntu-24.04"
             build: minimal
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: full
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
@@ -300,11 +300,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "amd64"
             runner: "ubuntu-24.04"
-          - os: debian
+          - os: debian12
             image: "debian:bookworm-slim"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"

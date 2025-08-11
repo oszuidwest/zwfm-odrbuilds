@@ -13,10 +13,10 @@ These precompiled binaries are designed for easy integration into your scripts o
 The binaries are built for multiple operating systems and architectures:
 
 ### ODR-PadEnc
-- Debian 12 (Bookworm)
+- Debian 12 (Bookworm) - filename: `debian12`
   - AMD64
   - ARM64
-- Debian 13 (Trixie)
+- Debian 13 (Trixie) - filename: `debian13`
   - AMD64
   - ARM64
 - Ubuntu 24.04 LTS
@@ -26,10 +26,10 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64
 
 ### ODR-AudioEnc
-- Debian 12 (Bookworm)
+- Debian 12 (Bookworm) - filename: `debian12`
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
-- Debian 13 (Trixie)
+- Debian 13 (Trixie) - filename: `debian13`
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
 - Ubuntu 24.04 LTS
@@ -39,10 +39,10 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64: Minimal and Full builds
 
 ### ODR-DabMux
-- Debian 12 (Bookworm)
+- Debian 12 (Bookworm) - filename: `debian12`
   - AMD64
   - ARM64
-- Debian 13 (Trixie)
+- Debian 13 (Trixie) - filename: `debian13`
   - AMD64
   - ARM64
 - Ubuntu 24.04 LTS
@@ -56,18 +56,27 @@ The binaries are built for multiple operating systems and architectures:
 ## Using the Prebuilt ODR Tools
 
 ### Download from GitHub Releases
-Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page of this repository. Each binary follows a naming convention that includes the tool name, version, operating system, and architecture (for example, `odr-padenc-v3.1.0-ubuntu-amd64`).
+Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page of this repository. Each binary follows a naming convention that includes the tool name, version, operating system, and architecture:
+
+**Naming Examples:**
+- `odr-padenc-v3.1.0-debian12-amd64` (Debian 12)
+- `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
+- `odr-padenc-v3.1.0-ubuntu-amd64` (Ubuntu)
+- `odr-audioenc-v3.6.0-minimal-debian12-amd64` (AudioEnc with variant)
 
 ### Example Integration
 
 ```bash
 #!/bin/bash
-# Download ODR-PadEnc binary for Ubuntu amd64
-wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-ubuntu-amd64 -O odr-padenc
+# Download ODR-PadEnc binary for Debian 12 amd64
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-debian12-amd64 -O odr-padenc
 chmod +x odr-padenc
 
 # Run the tool
 ./odr-padenc --help
+
+# Or download Debian 13 version
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-debian13-amd64 -O odr-padenc
 ```
 
 Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding asset names.
@@ -75,7 +84,7 @@ Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding
 
 ## Using Docker Images
 
-Pre-built Docker images are available for all variants on Debian 13 (Trixie) with AMD64 and ARM64 support:
+Pre-built Docker images are available for all variants on Debian 12 (Bookworm) with AMD64 and ARM64 support:
 
 ### Docker Image List
 - **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`
