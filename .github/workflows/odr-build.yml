@@ -396,7 +396,7 @@ jobs:
           echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: all_artifacts
 
@@ -437,7 +437,7 @@ jobs:
           echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: all_artifacts
 
@@ -478,7 +478,7 @@ jobs:
           echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: all_artifacts
 
