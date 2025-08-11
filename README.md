@@ -16,6 +16,9 @@ The binaries are built for multiple operating systems and architectures:
 - Debian 12 (Bookworm)
   - AMD64
   - ARM64
+- Debian 13 (Trixie)
+  - AMD64
+  - ARM64
 - Ubuntu 24.04 LTS
   - AMD64
   - ARM64
@@ -26,6 +29,9 @@ The binaries are built for multiple operating systems and architectures:
 - Debian 12 (Bookworm)
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
+- Debian 13 (Trixie)
+  - AMD64: Minimal and Full builds
+  - ARM64: Minimal and Full builds
 - Ubuntu 24.04 LTS
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
@@ -34,6 +40,9 @@ The binaries are built for multiple operating systems and architectures:
 
 ### ODR-DabMux
 - Debian 12 (Bookworm)
+  - AMD64
+  - ARM64
+- Debian 13 (Trixie)
   - AMD64
   - ARM64
 - Ubuntu 24.04 LTS
@@ -66,7 +75,7 @@ Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding
 
 ## Using Docker Images
 
-Pre-built Docker images are available for all variants on Debian with AMD64 and ARM64 support:
+Pre-built Docker images are available for all variants on Debian 13 (Trixie) with AMD64 and ARM64 support:
 
 ### Docker Image List
 - **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`

@@ -1,9 +1,10 @@
 # Build stage for downloading binary
-FROM debian:bookworm-slim AS downloader
+FROM debian:trixie-slim AS downloader
 
 ARG TOOL
 ARG VERSION
 ARG VARIANT=""
+ARG OS_VARIANT=debian13
 ARG TARGETARCH
 
 # Validate required args
@@ -19,11 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /download
 
-# Construct download URL based on tool type
+# Construct download URL based on tool type and OS variant
 RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
-        BINARY_NAME="${TOOL}-${VERSION}-debian-${TARGETARCH}"; \
+        BINARY_NAME="${TOOL}-${VERSION}-${OS_VARIANT}-${TARGETARCH}"; \
     else \
-        BINARY_NAME="${TOOL}-${VERSION}-${VARIANT}-debian-${TARGETARCH}"; \
+        BINARY_NAME="${TOOL}-${VERSION}-${VARIANT}-${OS_VARIANT}-${TARGETARCH}"; \
     fi && \
     echo "Downloading: ${BINARY_NAME}" && \
     DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TOOL}-${VERSION}/${BINARY_NAME}" && \
@@ -35,7 +36,7 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies
-FROM debian:bookworm-slim AS runtime
+FROM debian:trixie-slim AS runtime
 
 ARG TOOL
 ARG VARIANT=""
