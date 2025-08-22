@@ -66,7 +66,7 @@ jobs:
           {
             echo "VERSION=$ODR_PADENC_VERSION"
             echo "BRANCH=$ODR_PADENC_BRANCH"
-            echo "URL_BASE=https://github.com/Opendigitalradio"
+            echo "REPO_URL=$ODR_PADENC_REPO"
             echo "SOFTWARE=ODR-PadEnc"
           } >> "$GITHUB_ENV"
 
@@ -89,12 +89,12 @@ jobs:
         run: |
           # Check if BRANCH starts with 'v' (indicating a version tag)
           if [[ "${BRANCH}" =~ ^v[0-9] ]]; then
-            echo "Downloading tag ${BRANCH}"
-            curl -L "${URL_BASE}/${SOFTWARE}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
+            echo "Downloading tag ${BRANCH} from ${REPO_URL}"
+            curl -L "${REPO_URL}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
             mv ODR-PadEnc-* ODR-PadEnc
           else
-            echo "Cloning branch ${BRANCH}"
-            git clone --depth 1 --branch "${BRANCH}" "${URL_BASE}/${SOFTWARE}.git"
+            echo "Cloning branch ${BRANCH} from ${REPO_URL}"
+            git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}.git"
           fi
 
       - name: Build ODR-PadEnc
@@ -222,7 +222,7 @@ jobs:
           {
             echo "VERSION=$ODR_AUDIOENC_VERSION"
             echo "BRANCH=$ODR_AUDIOENC_BRANCH"
-            echo "URL_BASE=https://github.com/Opendigitalradio"
+            echo "REPO_URL=$ODR_AUDIOENC_REPO"
             echo "SOFTWARE=ODR-AudioEnc"
           } >> "$GITHUB_ENV"
 
@@ -252,12 +252,12 @@ jobs:
         run: |
           # Check if BRANCH starts with 'v' (indicating a version tag)
           if [[ "${BRANCH}" =~ ^v[0-9] ]]; then
-            echo "Downloading tag ${BRANCH}"
-            curl -L "${URL_BASE}/${SOFTWARE}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
+            echo "Downloading tag ${BRANCH} from ${REPO_URL}"
+            curl -L "${REPO_URL}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
             mv ODR-AudioEnc-* ODR-AudioEnc
           else
-            echo "Cloning branch ${BRANCH}"
-            git clone --depth 1 --branch "${BRANCH}" "${URL_BASE}/${SOFTWARE}.git"
+            echo "Cloning branch ${BRANCH} from ${REPO_URL}"
+            git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}.git"
           fi
 
       - name: Build ODR-AudioEnc
@@ -347,7 +347,7 @@ jobs:
           {
             echo "VERSION=$ODR_DABMUX_VERSION"
             echo "BRANCH=$ODR_DABMUX_BRANCH"
-            echo "URL_BASE=https://github.com/Opendigitalradio"
+            echo "REPO_URL=$ODR_DABMUX_REPO"
             echo "SOFTWARE=ODR-DabMux"
           } >> "$GITHUB_ENV"
 
@@ -372,12 +372,12 @@ jobs:
         run: |
           # Check if BRANCH starts with 'v' (indicating a version tag)
           if [[ "${BRANCH}" =~ ^v[0-9] ]]; then
-            echo "Downloading tag ${BRANCH}"
-            curl -L "${URL_BASE}/${SOFTWARE}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
+            echo "Downloading tag ${BRANCH} from ${REPO_URL}"
+            curl -L "${REPO_URL}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
             mv ODR-DabMux-* ODR-DabMux
           else
-            echo "Cloning branch ${BRANCH}"
-            git clone --depth 1 --branch "${BRANCH}" "${URL_BASE}/${SOFTWARE}.git"
+            echo "Cloning branch ${BRANCH} from ${REPO_URL}"
+            git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}.git"
           fi
 
       - name: Build ODR-DabMux
