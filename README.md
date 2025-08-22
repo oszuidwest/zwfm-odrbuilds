@@ -1,7 +1,7 @@
 # ZuidWest FM ODR Builds
 This repository contains tooling to automate the building and releasing of binaries for the [Open Digital Radio](https://github.com/opendigitalradio) tools:
 - **ODR-PadEnc** (v3.1.0)
-- **ODR-AudioEnc** (v3.6.0)
+- **ODR-AudioEnc** (v3.7.0)
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
 - **ODR-DabMux** (v5.3.0)
@@ -62,7 +62,7 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 - `odr-padenc-v3.1.0-debian12-amd64` (Debian 12)
 - `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
 - `odr-padenc-v3.1.0-ubuntu-amd64` (Ubuntu)
-- `odr-audioenc-v3.6.0-minimal-debian12-amd64` (AudioEnc with variant)
+- `odr-audioenc-v3.7.0-minimal-debian12-amd64` (AudioEnc with variant)
 
 ### Example Integration
 
