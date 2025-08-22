@@ -1,7 +1,7 @@
 # ZuidWest FM ODR Builds
 This repository contains tooling to automate the building and releasing of binaries for the [Open Digital Radio](https://github.com/opendigitalradio) tools:
 - **ODR-PadEnc** (v3.1.0)
-- **ODR-AudioEnc** (v3.7.0)
+- **ODR-AudioEnc** (v3.7.1) - Patched fork, the official v3.6.0 release by Open Digital Radio is available too.
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
 - **ODR-DabMux** (v5.3.0)
@@ -35,9 +35,6 @@ The binaries are built for multiple operating systems and architectures:
 - Ubuntu 24.04 LTS - filename: `ubuntu2404`
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
-- Ubuntu 22.04 LTS - filename: `ubuntu2204`
-  - AMD64: Minimal and Full builds
-  - ARM64: Minimal and Full builds
 - Alpine 3.22 - filename: `alpine322`
   - AMD64: Minimal and Full builds
 
@@ -66,8 +63,8 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 - `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
 - `odr-padenc-v3.1.0-ubuntu2404-amd64` (Ubuntu 24.04)
 - `odr-padenc-v3.1.0-alpine322-amd64` (Alpine 3.22)
-- `odr-audioenc-v3.7.0-minimal-debian12-amd64` (AudioEnc with variant)
-- `odr-audioenc-v3.7.0-full-ubuntu2404-arm64` (AudioEnc full variant)
+- `odr-audioenc-v3.7.1-minimal-debian12-amd64` (AudioEnc with variant)
+- `odr-audioenc-v3.7.1-full-ubuntu2404-arm64` (AudioEnc full variant)
 - `odr-dabmux-v5.3.0-ubuntu2404-amd64` (DabMux)
 
 ### Example Integration
