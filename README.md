@@ -90,7 +90,7 @@ Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding
 
 ## Using Docker Images
 
-Pre-built Docker images are available for all variants on Debian 12 (Bookworm) with AMD64 and ARM64 support:
+Pre-built Docker images are available for all variants on Debian 13 (Trixie) with AMD64 and ARM64 support:
 
 ### Docker Image List
 - **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`
