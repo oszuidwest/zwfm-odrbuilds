@@ -1,10 +1,10 @@
 # Build stage for downloading binary
-FROM debian:bookworm-slim AS downloader
+FROM debian:trixie-slim AS downloader
 
 ARG TOOL
 ARG VERSION
 ARG VARIANT=""
-ARG OS_VARIANT=debian12
+ARG OS_VARIANT=debian13
 ARG TARGETARCH
 
 # Validate required args
@@ -36,7 +36,7 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies
-FROM debian:bookworm-slim AS runtime
+FROM debian:trixie-slim AS runtime
 
 ARG TOOL
 ARG VARIANT=""
@@ -47,16 +47,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 # Install tool-specific runtime dependencies
 RUN if [ "$TOOL" = "odr-padenc" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libmagickwand-6.q16-6 locales && \
+        apt-get update && apt-get install -y --no-install-recommends libmagickwand-7.q16-10 locales && \
         sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
         locale-gen; \
     elif [ "$TOOL" = "odr-dabmux" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libzmq5 libboost-system1.81.0 libcurl4; \
+        apt-get update && apt-get install -y --no-install-recommends libzmq5 libboost-system1.83.0 libcurl4t64; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "minimal" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libzmq5 libcurl4 openssl; \
+        apt-get update && apt-get install -y --no-install-recommends libzmq5 libcurl4t64 openssl; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "full" ]; then \
         apt-get update && apt-get install -y --no-install-recommends \
-            libzmq5 libcurl4 libasound2 libjack0 libvlc5 vlc libvlc-dev \
+            libzmq5 libcurl4t64 libasound2t64 libjack0 libvlc5 vlc libvlc-dev \
             libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 openssl; \
     fi && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

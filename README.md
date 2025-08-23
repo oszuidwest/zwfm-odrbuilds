@@ -1,7 +1,7 @@
 # ZuidWest FM ODR Builds
 This repository contains tooling to automate the building and releasing of binaries for the [Open Digital Radio](https://github.com/opendigitalradio) tools:
-- **ODR-PadEnc** (v3.1.0)
-- **ODR-AudioEnc** (v3.7.1) - Patched fork, the official v3.6.0 release by Open Digital Radio is available too.
+- **ODR-PadEnc** (v3.1.0) - Built from the 'next' branch at ODR.
+- **ODR-AudioEnc** (v3.7.0) - Built from the 'next' branch at ODR.
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
 - **ODR-DabMux** (v5.3.0)
@@ -63,8 +63,8 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 - `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
 - `odr-padenc-v3.1.0-ubuntu2404-amd64` (Ubuntu 24.04)
 - `odr-padenc-v3.1.0-alpine322-amd64` (Alpine 3.22)
-- `odr-audioenc-v3.7.1-minimal-debian12-amd64` (AudioEnc with variant)
-- `odr-audioenc-v3.7.1-full-ubuntu2404-arm64` (AudioEnc full variant)
+- `odr-audioenc-v3.7.0-minimal-debian12-amd64` (AudioEnc with variant)
+- `odr-audioenc-v3.7.0-full-ubuntu2404-arm64` (AudioEnc full variant)
 - `odr-dabmux-v5.3.0-ubuntu2404-amd64` (DabMux)
 
 ### Example Integration
@@ -90,7 +90,7 @@ Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding
 
 ## Using Docker Images
 
-Pre-built Docker images are available for all variants on Debian 12 (Bookworm) with AMD64 and ARM64 support:
+Pre-built Docker images are available for all variants on Debian 13 (Trixie) with AMD64 and ARM64 support:
 
 ### Docker Image List
 - **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`
