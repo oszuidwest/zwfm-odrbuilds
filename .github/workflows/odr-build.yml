@@ -3,6 +3,22 @@ name: Build and Release ODR Artifacts
 
 on:
   workflow_dispatch:
+    inputs:
+      build_padenc:
+        description: 'Build ODR-PadEnc'
+        required: false
+        default: true
+        type: boolean
+      build_audioenc:
+        description: 'Build ODR-AudioEnc'
+        required: false
+        default: true
+        type: boolean
+      build_dabmux:
+        description: 'Build ODR-DabMux'
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -14,6 +30,7 @@ jobs:
   build_padenc:
     name: Build ODR-PadEnc Artifact
     runs-on: ${{ matrix.runner }}
+    if: ${{ inputs.build_padenc }}
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -128,6 +145,7 @@ jobs:
   build_audioenc:
     name: Build ODR-AudioEnc Artifact
     runs-on: ${{ matrix.runner }}
+    if: ${{ inputs.build_audioenc }}
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -295,6 +313,7 @@ jobs:
   build_dabmux:
     name: Build ODR-DabMux Artifact
     runs-on: ${{ matrix.runner }}
+    if: ${{ inputs.build_dabmux }}
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -415,6 +434,7 @@ jobs:
     name: Create GitHub Release for ODR-PadEnc
     runs-on: ubuntu-24.04
     needs: build_padenc
+    if: ${{ inputs.build_padenc && !cancelled() && !failure() }}
     permissions:
       contents: write
       packages: write
@@ -456,6 +476,7 @@ jobs:
     name: Create GitHub Release for ODR-AudioEnc
     runs-on: ubuntu-24.04
     needs: build_audioenc
+    if: ${{ inputs.build_audioenc && !cancelled() && !failure() }}
     permissions:
       contents: write
       packages: write
@@ -497,6 +518,7 @@ jobs:
     name: Create GitHub Release for ODR-DabMux
     runs-on: ubuntu-24.04
     needs: build_dabmux
+    if: ${{ inputs.build_dabmux && !cancelled() && !failure() }}
     permissions:
       contents: write
       packages: write
