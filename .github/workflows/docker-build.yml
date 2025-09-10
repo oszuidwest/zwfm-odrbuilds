@@ -81,8 +81,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}
           tags: |
-            type=semver,pattern={{version}},value=${{ env.VERSION }}
-            type=raw,value=latest
+            ${{ env.VERSION == 'next' && 'type=raw,value=next' || 'type=semver,pattern={{version}},value=${{ env.VERSION }}' }}
+            ${{ env.VERSION != 'next' && 'type=raw,value=latest' || '' }}
           labels: |
             org.opencontainers.image.title=${{ matrix.tool }}${{
               matrix.variant && format(' ({0})', matrix.variant) || '' }}
