@@ -36,31 +36,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Load environment variables
+      - name: Set environment variables
         id: env
         run: |
-          # Source build.env file and export to GitHub environment
-          set -a
-          . ./build.env
-          set +a
-
-          # Export to GitHub environment for use in subsequent steps
+          # Hardcoded registry settings
           {
-            echo "REGISTRY=$REGISTRY"
-            echo "ORGANIZATION=$ORGANIZATION"
-            echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
-            echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
-            echo "ODR_DABMUX_VERSION=$ODR_DABMUX_VERSION"
+            echo "REGISTRY=ghcr.io"
+            echo "ORGANIZATION=oszuidwest"
           } >> "$GITHUB_ENV"
 
-          # Set version based on tool
+          # Get latest version for each tool using gh CLI
           if [ "${{ matrix.tool }}" = "odr-padenc" ]; then
-            echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
+            VERSION=$(gh release list -R Opendigitalradio/ODR-PadEnc --limit 1 --json tagName --jq '.[0].tagName')
           elif [ "${{ matrix.tool }}" = "odr-audioenc" ]; then
-            echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
+            VERSION=$(gh release list -R Opendigitalradio/ODR-AudioEnc --limit 1 --json tagName --jq '.[0].tagName')
           else
-            echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
+            VERSION=$(gh release list -R Opendigitalradio/ODR-DabMux --limit 1 --json tagName --jq '.[0].tagName')
           fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

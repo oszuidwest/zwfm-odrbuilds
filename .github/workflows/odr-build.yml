@@ -3,17 +3,143 @@ name: Build and Release ODR Artifacts
 
 on:
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type (stable/dev)'
+        required: false
+        default: 'manual'
+        type: choice
+        options:
+          - manual
+          - stable
+          - dev
+      tools:
+        description: 'Tools to build (comma-separated: padenc,audioenc,dabmux or leave empty for all)'
+        required: false
+        default: ''
+      force_version:
+        description: 'Force specific version (overrides detection)'
+        required: false
+        default: ''
+      skip_existing:
+        description: 'Skip builds if release already exists'
+        required: false
+        default: 'true'
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
   ##################################
+  # Configuration Jobs
+  ##################################
+  determine-builds:
+    name: Determine which tools to build
+    runs-on: ubuntu-24.04
+    outputs:
+      build-padenc: ${{ steps.config.outputs.build-padenc }}
+      build-audioenc: ${{ steps.config.outputs.build-audioenc }}
+      build-dabmux: ${{ steps.config.outputs.build-dabmux }}
+      padenc-version: ${{ steps.config.outputs.padenc-version }}
+      audioenc-version: ${{ steps.config.outputs.audioenc-version }}
+      dabmux-version: ${{ steps.config.outputs.dabmux-version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Determine build configuration
+        id: config
+        run: |
+          BUILD_TYPE="${{ inputs.build_type }}"
+          TOOLS_INPUT="${{ inputs.tools }}"
+          
+          # Get versions first
+          if [[ "$BUILD_TYPE" == "dev" ]]; then
+            # For dev builds, always use "next" as version (rolling release)
+            PADENC_VER="next"
+            AUDIOENC_VER="next"
+            DABMUX_VER="next"
+            
+            # But get current commit SHAs to check if we need to rebuild
+            PADENC_SHA=$(gh api repos/Opendigitalradio/ODR-PadEnc/branches/next --jq '.commit.sha[0:7]')
+            AUDIOENC_SHA=$(gh api repos/Opendigitalradio/ODR-AudioEnc/branches/next --jq '.commit.sha[0:7]')
+            DABMUX_SHA=$(gh api repos/Opendigitalradio/ODR-DabMux/branches/next --jq '.commit.sha[0:7]')
+          else
+            # Get latest tags using gh CLI
+            PADENC_VER=$(gh release list -R Opendigitalradio/ODR-PadEnc --limit 1 --json tagName --jq '.[0].tagName')
+            AUDIOENC_VER=$(gh release list -R Opendigitalradio/ODR-AudioEnc --limit 1 --json tagName --jq '.[0].tagName')
+            DABMUX_VER=$(gh release list -R Opendigitalradio/ODR-DabMux --limit 1 --json tagName --jq '.[0].tagName')
+          fi
+          
+          echo "padenc-version=$PADENC_VER" >> "$GITHUB_OUTPUT"
+          echo "audioenc-version=$AUDIOENC_VER" >> "$GITHUB_OUTPUT"
+          echo "dabmux-version=$DABMUX_VER" >> "$GITHUB_OUTPUT"
+          
+          SKIP_EXISTING="${{ inputs.skip_existing }}"
+          
+          # Check if we need to build (only if skip_existing is true)
+          if [[ "$SKIP_EXISTING" == "true" ]]; then
+            if [[ "$BUILD_TYPE" == "dev" ]]; then
+              # For dev builds, check if current commit SHA matches what's in existing release
+              PADENC_CURRENT_SHA=$(gh release view "odr-padenc-$PADENC_VER" --json body --jq '.body' 2>/dev/null | grep "Commit:" | cut -d' ' -f2 || echo "none")
+              AUDIOENC_CURRENT_SHA=$(gh release view "odr-audioenc-$AUDIOENC_VER" --json body --jq '.body' 2>/dev/null | grep "Commit:" | cut -d' ' -f2 || echo "none")
+              DABMUX_CURRENT_SHA=$(gh release view "odr-dabmux-$DABMUX_VER" --json body --jq '.body' 2>/dev/null | grep "Commit:" | cut -d' ' -f2 || echo "none")
+              
+              # Compare SHAs - if different, we need to rebuild
+              [[ "$PADENC_SHA" == "$PADENC_CURRENT_SHA" ]] && PADENC_EXISTS="exists" || PADENC_EXISTS="null"
+              [[ "$AUDIOENC_SHA" == "$AUDIOENC_CURRENT_SHA" ]] && AUDIOENC_EXISTS="exists" || AUDIOENC_EXISTS="null"  
+              [[ "$DABMUX_SHA" == "$DABMUX_CURRENT_SHA" ]] && DABMUX_EXISTS="exists" || DABMUX_EXISTS="null"
+            else
+              # For stable builds, just check if release exists
+              PADENC_EXISTS=$(gh release view "odr-padenc-$PADENC_VER" --json id --jq '.id' 2>/dev/null || echo "null")
+              AUDIOENC_EXISTS=$(gh release view "odr-audioenc-$AUDIOENC_VER" --json id --jq '.id' 2>/dev/null || echo "null")
+              DABMUX_EXISTS=$(gh release view "odr-dabmux-$DABMUX_VER" --json id --jq '.id' 2>/dev/null || echo "null")
+              [[ "$PADENC_EXISTS" != "null" ]] && PADENC_EXISTS="exists" || PADENC_EXISTS="null"
+              [[ "$AUDIOENC_EXISTS" != "null" ]] && AUDIOENC_EXISTS="exists" || AUDIOENC_EXISTS="null"
+              [[ "$DABMUX_EXISTS" != "null" ]] && DABMUX_EXISTS="exists" || DABMUX_EXISTS="null"
+            fi
+          else
+            PADENC_EXISTS="null"
+            AUDIOENC_EXISTS="null" 
+            DABMUX_EXISTS="null"
+          fi
+          
+          # Determine which tools to build based on input AND whether they already exist
+          if [[ -z "$TOOLS_INPUT" ]]; then
+            # Build all tools, but only if they don't exist yet (or skip_existing is false)
+            [[ "$PADENC_EXISTS" == "null" ]] && echo "build-padenc=true" >> "$GITHUB_OUTPUT" || echo "build-padenc=false" >> "$GITHUB_OUTPUT"
+            [[ "$AUDIOENC_EXISTS" == "null" ]] && echo "build-audioenc=true" >> "$GITHUB_OUTPUT" || echo "build-audioenc=false" >> "$GITHUB_OUTPUT"
+            [[ "$DABMUX_EXISTS" == "null" ]] && echo "build-dabmux=true" >> "$GITHUB_OUTPUT" || echo "build-dabmux=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build-padenc=false" >> "$GITHUB_OUTPUT"
+            echo "build-audioenc=false" >> "$GITHUB_OUTPUT"
+            echo "build-dabmux=false" >> "$GITHUB_OUTPUT"
+            
+            # Parse tools list and check existence
+            IFS=',' read -ra TOOLS <<< "$TOOLS_INPUT"
+            for tool in "${TOOLS[@]}"; do
+              case "$tool" in
+                "padenc") [[ "$PADENC_EXISTS" == "null" ]] && echo "build-padenc=true" >> "$GITHUB_OUTPUT" ;;
+                "audioenc") [[ "$AUDIOENC_EXISTS" == "null" ]] && echo "build-audioenc=true" >> "$GITHUB_OUTPUT" ;;
+                "dabmux") [[ "$DABMUX_EXISTS" == "null" ]] && echo "build-dabmux=true" >> "$GITHUB_OUTPUT" ;;
+              esac
+            done
+          fi
+          
+          echo "Release existence check:"
+          echo "  PadEnc $PADENC_VER: $([ "$PADENC_EXISTS" != "null" ] && echo "EXISTS" || echo "MISSING")"
+          echo "  AudioEnc $AUDIOENC_VER: $([ "$AUDIOENC_EXISTS" != "null" ] && echo "EXISTS" || echo "MISSING")"
+          echo "  DabMux $DABMUX_VER: $([ "$DABMUX_EXISTS" != "null" ] && echo "EXISTS" || echo "MISSING")"
+
+  ##################################
   # Build Jobs
   ##################################
   build_padenc:
     name: Build ODR-PadEnc Artifact
     runs-on: ${{ matrix.runner }}
+    needs: determine-builds
+    if: needs.determine-builds.outputs.build-padenc == 'true'
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -48,25 +174,22 @@ jobs:
             arch: "amd64"
             runner: "ubuntu-24.04"
     steps:
-      - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v5
-        with:
-          sparse-checkout: |
-            build.env
-          sparse-checkout-cone-mode: false
-
-      - name: Load configuration
+      - name: Set configuration
         run: |
-          # Source build.env file
-          set -a
-          . ./build.env
-          set +a
-
+          VERSION="${{ needs.determine-builds.outputs.padenc-version }}"
+          
+          # For dev builds, use 'next' branch. For stable, use the tag
+          if [[ "$VERSION" == "next" ]]; then
+            BRANCH="next"
+          else
+            BRANCH="$VERSION"
+          fi
+          
           # Export to environment
           {
-            echo "VERSION=$ODR_PADENC_VERSION"
-            echo "BRANCH=$ODR_PADENC_BRANCH"
-            echo "REPO_URL=$ODR_PADENC_REPO"
+            echo "VERSION=$VERSION"
+            echo "BRANCH=$BRANCH"
+            echo "REPO_URL=https://github.com/Opendigitalradio/ODR-PadEnc"
             echo "SOFTWARE=ODR-PadEnc"
           } >> "$GITHUB_ENV"
 
@@ -128,6 +251,8 @@ jobs:
   build_audioenc:
     name: Build ODR-AudioEnc Artifact
     runs-on: ${{ matrix.runner }}
+    needs: determine-builds
+    if: needs.determine-builds.outputs.build-audioenc == 'true'
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -204,25 +329,22 @@ jobs:
             runner: "ubuntu-24.04"
             build: full
     steps:
-      - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v5
-        with:
-          sparse-checkout: |
-            build.env
-          sparse-checkout-cone-mode: false
-
-      - name: Load configuration
+      - name: Set configuration
         run: |
-          # Source build.env file
-          set -a
-          . ./build.env
-          set +a
-
+          VERSION="${{ needs.determine-builds.outputs.audioenc-version }}"
+          
+          # For dev builds, use 'next' branch. For stable, use the tag
+          if [[ "$VERSION" == "next" ]]; then
+            BRANCH="next"
+          else
+            BRANCH="$VERSION"
+          fi
+          
           # Export to environment
           {
-            echo "VERSION=$ODR_AUDIOENC_VERSION"
-            echo "BRANCH=$ODR_AUDIOENC_BRANCH"
-            echo "REPO_URL=$ODR_AUDIOENC_REPO"
+            echo "VERSION=$VERSION"
+            echo "BRANCH=$BRANCH"
+            echo "REPO_URL=https://github.com/Opendigitalradio/ODR-AudioEnc"
             echo "SOFTWARE=ODR-AudioEnc"
           } >> "$GITHUB_ENV"
 
@@ -295,6 +417,8 @@ jobs:
   build_dabmux:
     name: Build ODR-DabMux Artifact
     runs-on: ${{ matrix.runner }}
+    needs: determine-builds
+    if: needs.determine-builds.outputs.build-dabmux == 'true'
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -329,25 +453,22 @@ jobs:
             arch: "amd64"
             runner: "ubuntu-24.04"
     steps:
-      - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v5
-        with:
-          sparse-checkout: |
-            build.env
-          sparse-checkout-cone-mode: false
-
-      - name: Load configuration
+      - name: Set configuration
         run: |
-          # Source build.env file
-          set -a
-          . ./build.env
-          set +a
-
+          VERSION="${{ needs.determine-builds.outputs.dabmux-version }}"
+          
+          # For dev builds, use 'next' branch. For stable, use the tag
+          if [[ "$VERSION" == "next" ]]; then
+            BRANCH="next"
+          else
+            BRANCH="$VERSION"
+          fi
+          
           # Export to environment
           {
-            echo "VERSION=$ODR_DABMUX_VERSION"
-            echo "BRANCH=$ODR_DABMUX_BRANCH"
-            echo "REPO_URL=$ODR_DABMUX_REPO"
+            echo "VERSION=$VERSION"
+            echo "BRANCH=$BRANCH"
+            echo "REPO_URL=https://github.com/Opendigitalradio/ODR-DabMux"
             echo "SOFTWARE=ODR-DabMux"
           } >> "$GITHUB_ENV"
 
@@ -414,7 +535,8 @@ jobs:
   release_padenc:
     name: Create GitHub Release for ODR-PadEnc
     runs-on: ubuntu-24.04
-    needs: build_padenc
+    needs: [determine-builds, build_padenc]
+    if: needs.determine-builds.outputs.build-padenc == 'true'
     permissions:
       contents: write
       packages: write
@@ -429,7 +551,7 @@ jobs:
           . ./build.env
           set +a
 
-          echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
+          echo "VERSION=${{ needs.determine-builds.outputs.padenc-version }}" >> "$GITHUB_ENV"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v5
@@ -455,7 +577,8 @@ jobs:
   release_audioenc:
     name: Create GitHub Release for ODR-AudioEnc
     runs-on: ubuntu-24.04
-    needs: build_audioenc
+    needs: [determine-builds, build_audioenc]
+    if: needs.determine-builds.outputs.build-audioenc == 'true'
     permissions:
       contents: write
       packages: write
@@ -463,14 +586,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Load version
+      - name: Set version
         run: |
-          # Source build.env file
-          set -a
-          . ./build.env
-          set +a
-
-          echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
+          echo "VERSION=${{ needs.determine-builds.outputs.audioenc-version }}" >> "$GITHUB_ENV"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v5
@@ -496,7 +614,8 @@ jobs:
   release_dabmux:
     name: Create GitHub Release for ODR-DabMux
     runs-on: ubuntu-24.04
-    needs: build_dabmux
+    needs: [determine-builds, build_dabmux]
+    if: needs.determine-builds.outputs.build-dabmux == 'true'
     permissions:
       contents: write
       packages: write
@@ -506,12 +625,7 @@ jobs:
 
       - name: Load version
         run: |
-          # Source build.env file
-          set -a
-          . ./build.env
-          set +a
-
-          echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
+          echo "VERSION=${{ needs.determine-builds.outputs.dabmux-version }}" >> "$GITHUB_ENV"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v5

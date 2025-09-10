@@ -1,0 +1,61 @@
+---
+name: Weekly Auto Build
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  get-latest-versions:
+    name: Get Latest Upstream Versions
+    runs-on: ubuntu-24.04
+    outputs:
+      padenc-latest: ${{ steps.versions.outputs.padenc-latest }}
+      audioenc-latest: ${{ steps.versions.outputs.audioenc-latest }}
+      dabmux-latest: ${{ steps.versions.outputs.dabmux-latest }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Get latest versions using gh CLI
+        id: versions
+        run: |
+          # Get latest tags from each repo using gh CLI
+          PADENC_LATEST=$(gh release list -R Opendigitalradio/ODR-PadEnc --limit 1 --json tagName --jq '.[0].tagName')
+          AUDIOENC_LATEST=$(gh release list -R Opendigitalradio/ODR-AudioEnc --limit 1 --json tagName --jq '.[0].tagName')
+          DABMUX_LATEST=$(gh release list -R Opendigitalradio/ODR-DabMux --limit 1 --json tagName --jq '.[0].tagName')
+          
+          echo "padenc-latest=$PADENC_LATEST" >> "$GITHUB_OUTPUT"
+          echo "audioenc-latest=$AUDIOENC_LATEST" >> "$GITHUB_OUTPUT"
+          echo "dabmux-latest=$DABMUX_LATEST" >> "$GITHUB_OUTPUT"
+          
+          echo "Latest versions detected:"
+          echo "  ODR-PadEnc: $PADENC_LATEST"
+          echo "  ODR-AudioEnc: $AUDIOENC_LATEST"
+          echo "  ODR-DabMux: $DABMUX_LATEST"
+
+  build-stable:
+    name: Build Latest Stable Versions
+    needs: get-latest-versions
+    uses: ./.github/workflows/odr-build.yml
+    with:
+      build_type: stable
+      tools: ''
+      force_version: ''
+      skip_existing: true
+
+  build-dev:
+    name: Build Development Versions  
+    needs: get-latest-versions
+    uses: ./.github/workflows/odr-build.yml
+    with:
+      build_type: dev
+      tools: ''
+      force_version: ''
+      skip_existing: true
