@@ -37,6 +37,8 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       registry: ${{ steps.env.outputs.registry }}
@@ -273,6 +275,8 @@ jobs:
     needs: [prepare, build-and-push]
     if: always()
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Summary
         run: |
