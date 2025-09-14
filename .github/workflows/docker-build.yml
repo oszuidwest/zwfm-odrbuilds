@@ -3,34 +3,118 @@ name: Build and Push Docker Images
 
 on:
   workflow_dispatch:
+    inputs:
+      build_padenc:
+        description: 'Build ODR-PadEnc Docker image'
+        required: false
+        default: true
+        type: boolean
+      build_audioenc_minimal:
+        description: 'Build ODR-AudioEnc Minimal Docker image'
+        required: false
+        default: true
+        type: boolean
+      build_audioenc_full:
+        description: 'Build ODR-AudioEnc Full Docker image'
+        required: false
+        default: true
+        type: boolean
+      build_dabmux:
+        description: 'Build ODR-DabMux Docker image'
+        required: false
+        default: true
+        type: boolean
+      force_rebuild:
+        description: 'Force rebuild even if images exist'
+        required: false
+        default: false
+        type: boolean
   workflow_run:
     workflows: ["Build and Release ODR Artifacts"]
     types:
       - completed
 
 jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      registry: ${{ steps.env.outputs.registry }}
+      organization: ${{ steps.env.outputs.organization }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Load environment variables
+        id: env
+        run: |
+          # Source build.env file
+          set -a
+          . ./build.env
+          set +a
+
+          # Export registry and organization
+          echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "organization=$ORGANIZATION" >> "$GITHUB_OUTPUT"
+
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          # Build matrix based on workflow inputs or defaults
+
+          # For workflow_run, build all by default
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+              echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            build_padenc=true
+            build_audioenc_minimal=true
+            build_audioenc_full=true
+            build_dabmux=true
+          else
+            build_padenc=${{ inputs.build_padenc }}
+            build_audioenc_minimal=${{ inputs.build_audioenc_minimal }}
+            build_audioenc_full=${{ inputs.build_audioenc_full }}
+            build_dabmux=${{ inputs.build_dabmux }}
+          fi
+
+          # Build matrix array
+          matrix_items=""
+
+          if [ "$build_padenc" = "true" ]; then
+            [ -n "$matrix_items" ] && matrix_items="${matrix_items},"
+            matrix_items="${matrix_items}{\"tool\":\"odr-padenc\",\"variant\":\"\",\"image_name\":\"odr-padenc\"}"
+          fi
+
+          if [ "$build_audioenc_minimal" = "true" ]; then
+            [ -n "$matrix_items" ] && matrix_items="${matrix_items},"
+            matrix_items="${matrix_items}{\"tool\":\"odr-audioenc\",\"variant\":\"minimal\",\"image_name\":\"odr-audioenc-minimal\"}"
+          fi
+
+          if [ "$build_audioenc_full" = "true" ]; then
+            [ -n "$matrix_items" ] && matrix_items="${matrix_items},"
+            matrix_items="${matrix_items}{\"tool\":\"odr-audioenc\",\"variant\":\"full\",\"image_name\":\"odr-audioenc-full\"}"
+          fi
+
+          if [ "$build_dabmux" = "true" ]; then
+            [ -n "$matrix_items" ] && matrix_items="${matrix_items},"
+            matrix_items="${matrix_items}{\"tool\":\"odr-dabmux\",\"variant\":\"\",\"image_name\":\"odr-dabmux\"}"
+          fi
+
+          # Output final matrix
+          echo "matrix={\"include\":[${matrix_items}]}" >> "$GITHUB_OUTPUT"
+
   build-and-push:
+    needs: prepare
+    if: ${{ needs.prepare.outputs.matrix != '{"include":[]}' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-
     strategy:
-      matrix:
-        include:
-          - tool: odr-padenc
-            variant: ""
-            image_name: odr-padenc
-          - tool: odr-audioenc
-            variant: minimal
-            image_name: odr-audioenc-minimal
-          - tool: odr-audioenc
-            variant: full
-            image_name: odr-audioenc-full
-          - tool: odr-dabmux
-            variant: ""
-            image_name: odr-dabmux
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      fail-fast: false
 
     steps:
       - name: Checkout repository
@@ -46,8 +130,8 @@ jobs:
 
           # Export to GitHub environment for use in subsequent steps
           {
-            echo "REGISTRY=$REGISTRY"
-            echo "ORGANIZATION=$ORGANIZATION"
+            echo "REGISTRY=${{ needs.prepare.outputs.registry }}"
+            echo "ORGANIZATION=${{ needs.prepare.outputs.organization }}"
             echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
             echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
             echo "ODR_DABMUX_VERSION=$ODR_DABMUX_VERSION"
@@ -62,12 +146,6 @@ jobs:
             echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
           fi
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -75,20 +153,92 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check if image exists
+        id: check_image
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}"
+
+          # Check if the specific version already exists
+          if docker manifest inspect "${IMAGE}:${{ env.VERSION }}" > /dev/null 2>&1; then
+            echo "Image ${IMAGE}:${{ env.VERSION }} already exists"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+
+            # For non-next versions, always update to ensure latest tag is current
+            if [ "${{ env.VERSION }}" != "next" ]; then
+              echo "latest_current=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "latest_current=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "Image does not exist, will build"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "latest_current=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check if artifacts exist
+        if: steps.check_image.outputs.exists == 'false' || inputs.force_rebuild == true
+        id: check_artifacts
+        run: |
+          # Check if the required artifacts exist in releases
+          RELEASE_TAG="${{ matrix.tool }}-${{ env.VERSION }}"
+
+          if gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "Release artifacts exist for $RELEASE_TAG"
+            echo "artifacts_exist=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No release artifacts found for $RELEASE_TAG"
+            echo "artifacts_exist=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip or build decision
+        id: decision
+        run: |
+          if [ "${{ inputs.force_rebuild }}" = "true" ]; then
+            echo "Force rebuild requested"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.check_image.outputs.exists }}" = "false" ]; then
+            if [ "${{ steps.check_artifacts.outputs.artifacts_exist }}" = "true" ]; then
+              echo "Image doesn't exist but artifacts do, will build"
+              echo "should_build=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Image doesn't exist and no artifacts available, skipping"
+              echo "should_build=false" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${{ steps.check_image.outputs.latest_current }}" = "false" ] && [ "${{ env.VERSION }}" != "next" ]; then
+            echo "Need to update latest tag"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Image already exists and is current, skipping"
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up QEMU
+        if: steps.decision.outputs.should_build == 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: steps.decision.outputs.should_build == 'true'
+        uses: docker/setup-buildx-action@v3
+
       - name: Extract metadata
+        if: steps.decision.outputs.should_build == 'true'
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}
           tags: |
-            ${{ env.VERSION == 'next' && 'type=raw,value=next' || 'type=semver,pattern={{version}},value=${{ env.VERSION }}' }}
+            type=raw,value=${{ env.VERSION }}
             ${{ env.VERSION != 'next' && 'type=raw,value=latest' || '' }}
           labels: |
             org.opencontainers.image.title=${{ matrix.tool }}${{
               matrix.variant && format(' ({0})', matrix.variant) || '' }}
             org.opencontainers.image.description=ODR tool for DAB+ broadcasting
+            org.opencontainers.image.version=${{ env.VERSION }}
 
       - name: Build and push Docker image
+        if: steps.decision.outputs.should_build == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -107,3 +257,30 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ "${{ steps.decision.outputs.should_build }}" = "false" ]; then
+            echo "✅ Skipped: ${{ matrix.image_name }}:${{ env.VERSION }} (already exists and current)"
+          elif [ "${{ steps.check_artifacts.outputs.artifacts_exist }}" = "false" ]; then
+            echo "⚠️ Skipped: ${{ matrix.image_name }}:${{ env.VERSION }} (no artifacts available)"
+          else
+            echo "🔨 Built: ${{ matrix.image_name }}:${{ env.VERSION }}"
+          fi
+
+  summary:
+    needs: [prepare, build-and-push]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Summary
+        run: |
+          echo "## Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.prepare.outputs.matrix }}" = '{"include":[]}' ]; then
+            echo "No images were selected for building." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Build completed. Check individual job outputs for details." >> $GITHUB_STEP_SUMMARY
+          fi
