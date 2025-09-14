@@ -164,17 +164,9 @@ jobs:
           if docker manifest inspect "${IMAGE}:${{ env.VERSION }}" > /dev/null 2>&1; then
             echo "Image ${IMAGE}:${{ env.VERSION }} already exists"
             echo "exists=true" >> "$GITHUB_OUTPUT"
-
-            # For non-next versions, always update to ensure latest tag is current
-            if [ "${{ env.VERSION }}" != "next" ]; then
-              echo "latest_current=false" >> "$GITHUB_OUTPUT"
-            else
-              echo "latest_current=true" >> "$GITHUB_OUTPUT"
-            fi
           else
             echo "Image does not exist, will build"
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "latest_current=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check if artifacts exist
@@ -208,11 +200,8 @@ jobs:
               echo "Image doesn't exist and no artifacts available, skipping"
               echo "should_build=false" >> "$GITHUB_OUTPUT"
             fi
-          elif [ "${{ steps.check_image.outputs.latest_current }}" = "false" ] && [ "${{ env.VERSION }}" != "next" ]; then
-            echo "Need to update latest tag"
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Image already exists and is current, skipping"
+            echo "Image already exists, skipping rebuild"
             echo "should_build=false" >> "$GITHUB_OUTPUT"
           fi
 
