@@ -5,8 +5,11 @@ This repository contains tooling to automate the building and releasing of binar
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
 - **ODR-DabMux** (v5.4.1)
+- **DABlin** (v1.16.1) - DAB/DAB+ receiver
+  - CLI build (command-line interface)
+  - GTK build (graphical user interface)
 
-These precompiled binaries are designed for easy integration into your scripts or projects. The ODR-PadEnc binary is built with all options enabled, while ODR-AudioEnc is available in two variants: a minimal version that accepts piped input, and a full version that includes additional support for ALSA, Jack, GStreamer, and VLC. ODR-DabMux is built with ZeroMQ, Boost, and cURL support for full functionality.
+These precompiled binaries are designed for easy integration into your scripts or projects. The ODR-PadEnc binary is built with all options enabled, while ODR-AudioEnc is available in two variants: a minimal version that accepts piped input, and a full version that includes additional support for ALSA, Jack, GStreamer, and VLC. ODR-DabMux is built with ZeroMQ, Boost, and cURL support for full functionality. DABlin is available in two variants: a CLI version for command-line usage and a GTK version with graphical user interface.
 
 ## Operating System Support
 
@@ -51,6 +54,20 @@ The binaries are built for multiple operating systems and architectures:
 - Alpine 3.22 - filename: `alpine322`
   - AMD64
 
+### DABlin
+- Debian 12 (Bookworm) - filename: `debian12`
+  - AMD64: CLI and GTK builds
+  - ARM64: CLI and GTK builds
+- Debian 13 (Trixie) - filename: `debian13`
+  - AMD64: CLI and GTK builds
+  - ARM64: CLI and GTK builds
+- Ubuntu 24.04 LTS - filename: `ubuntu2404`
+  - AMD64: CLI and GTK builds
+  - ARM64: CLI and GTK builds
+- macOS - filename: `macos`
+  - AMD64 (Intel): CLI and GTK builds
+  - ARM64 (Apple Silicon): CLI and GTK builds
+
 **Note:** ARM64 builds are not available for Alpine due to current limitations in GitHub Actions runners.
 
 ## Using the Prebuilt ODR Tools
@@ -66,6 +83,9 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 - `odr-audioenc-next-minimal-debian12-amd64` (AudioEnc with variant)
 - `odr-audioenc-next-full-ubuntu2404-arm64` (AudioEnc full variant)
 - `odr-dabmux-v5.4.1-ubuntu2404-amd64` (DabMux)
+- `dablin-v1.16.1-cli-debian12-amd64` (DABlin CLI)
+- `dablin-v1.16.1-gtk-ubuntu2404-arm64` (DABlin GTK)
+- `dablin-v1.16.1-cli-macos-arm64` (DABlin macOS)
 
 ### Example Integration
 
@@ -83,6 +103,19 @@ wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v
 
 # Or download Alpine 3.22 version
 wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-alpine322-amd64 -O odr-padenc
+
+# Download DABlin CLI for Linux
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/dablin-v1.16.1/dablin-v1.16.1-cli-ubuntu2404-amd64 -O dablin
+chmod +x dablin
+./dablin --help
+
+# Download DABlin GTK for Linux
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/dablin-v1.16.1/dablin-v1.16.1-gtk-ubuntu2404-amd64 -O dablin-gtk
+chmod +x dablin-gtk
+
+# Download DABlin for macOS (Apple Silicon)
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/dablin-v1.16.1/dablin-v1.16.1-cli-macos-arm64 -O dablin
+chmod +x dablin
 ```
 
 Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding asset names.
@@ -90,7 +123,7 @@ Similarly, download **ODR-AudioEnc** or **ODR-DabMux** using their corresponding
 
 ## Using Docker Images
 
-Pre-built Docker images are available for all variants on Debian 13 (Trixie) with AMD64 and ARM64 support:
+Pre-built Docker images are available for ODR tools (except DABlin) on Debian 13 (Trixie) with AMD64 and ARM64 support:
 
 ### Docker Image List
 - **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`
