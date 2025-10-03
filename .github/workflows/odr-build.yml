@@ -570,20 +570,20 @@ jobs:
         working-directory: dablin/build
         run: |
           if [ "${{ matrix.build }}" = "gtk" ]; then
-            BINARY_NAME="dablin-gtk-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}"
+            BINARY_NAME="dablin-${{ env.VERSION }}-gtk-${{ matrix.os }}-${{ matrix.arch }}"
             if [ -f dablin-gtk ]; then
               cp dablin-gtk "../../output/$BINARY_NAME"
             else
               echo "Build failed: dablin-gtk not found!" && exit 1
             fi
-          fi
-
-          # Always copy CLI version
-          CLI_BINARY_NAME="dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}"
-          if [ -f dablin ]; then
-            cp dablin "../../output/$CLI_BINARY_NAME"
           else
-            echo "Build failed: dablin not found!" && exit 1
+            # CLI version only
+            CLI_BINARY_NAME="dablin-${{ env.VERSION }}-cli-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ -f dablin ]; then
+              cp dablin "../../output/$CLI_BINARY_NAME"
+            else
+              echo "Build failed: dablin not found!" && exit 1
+            fi
           fi
 
       - name: Upload DABlin Artifact
@@ -679,20 +679,20 @@ jobs:
         working-directory: dablin/build
         run: |
           if [ "${{ matrix.build }}" = "gtk" ]; then
-            BINARY_NAME="dablin-gtk-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}"
+            BINARY_NAME="dablin-${{ env.VERSION }}-gtk-${{ matrix.os }}-${{ matrix.arch }}"
             if [ -f dablin-gtk ]; then
               cp dablin-gtk "../../output/$BINARY_NAME"
             else
               echo "Build failed: dablin-gtk not found!" && exit 1
             fi
-          fi
-
-          # Always copy CLI version
-          CLI_BINARY_NAME="dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}"
-          if [ -f dablin ]; then
-            cp dablin "../../output/$CLI_BINARY_NAME"
           else
-            echo "Build failed: dablin not found!" && exit 1
+            # CLI version only
+            CLI_BINARY_NAME="dablin-${{ env.VERSION }}-cli-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ -f dablin ]; then
+              cp dablin "../../output/$CLI_BINARY_NAME"
+            else
+              echo "Build failed: dablin not found!" && exit 1
+            fi
           fi
 
       - name: Upload DABlin Artifact
