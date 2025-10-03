@@ -436,9 +436,7 @@ jobs:
     name: Build DABlin Artifact
     runs-on: ${{ matrix.runner }}
     if: ${{ inputs.build_dablin }}
-    container:
-      image: ${{ matrix.image }}
-      options: ${{ matrix.options || '' }}
+    container: ${{ matrix.image && { image: matrix.image } || null }}
     strategy:
       matrix:
         include:
@@ -503,14 +501,14 @@ jobs:
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: gtk
-          # macOS builds (no container)
+          # macOS builds (no container, no image field)
           - os: macos
             arch: "amd64"
-            runner: "macos-15-intel"
+            runner: "macos-15-large"
             build: cli
           - os: macos
             arch: "amd64"
-            runner: "macos-15-intel"
+            runner: "macos-15-large"
             build: gtk
           - os: macos
             arch: "arm64"
@@ -591,7 +589,7 @@ jobs:
             cmake .. -DUSE_GUI=OFF
           fi
 
-          make -j"$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
+          make -j"$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)"
 
       - name: Prepare output directory
         run: mkdir -p output
@@ -621,6 +619,7 @@ jobs:
         with:
           name: dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/*
+
 
   ##################################
   # Release Jobs
