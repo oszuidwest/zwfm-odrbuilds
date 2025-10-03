@@ -19,6 +19,11 @@ on:
         required: false
         default: true
         type: boolean
+      build_dablin:
+        description: 'Build DABlin'
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -427,6 +432,283 @@ jobs:
           name: odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
 
+  build_dablin_linux:
+    name: Build DABlin Artifact (Linux)
+    runs-on: ${{ matrix.runner }}
+    if: ${{ inputs.build_dablin }}
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      matrix:
+        include:
+          - os: debian12
+            image: "debian:bookworm-slim"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: cli
+          - os: debian12
+            image: "debian:bookworm-slim"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: gtk
+          - os: debian12
+            image: "debian:bookworm-slim"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: cli
+          - os: debian12
+            image: "debian:bookworm-slim"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: gtk
+          - os: debian13
+            image: "debian:trixie-slim"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: cli
+          - os: debian13
+            image: "debian:trixie-slim"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: gtk
+          - os: debian13
+            image: "debian:trixie-slim"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: cli
+          - os: debian13
+            image: "debian:trixie-slim"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: gtk
+          - os: ubuntu2404
+            image: "ubuntu:24.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: cli
+          - os: ubuntu2404
+            image: "ubuntu:24.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: gtk
+          - os: ubuntu2404
+            image: "ubuntu:24.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: cli
+          - os: ubuntu2404
+            image: "ubuntu:24.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: gtk
+    steps:
+      - name: Checkout repository (for build.env file)
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
+
+      - name: Load configuration
+        run: |
+          # Source build.env file
+          set -a
+          . ./build.env
+          set +a
+
+          # Export to environment
+          {
+            echo "VERSION=$DABLIN_VERSION"
+            echo "BRANCH=$DABLIN_BRANCH"
+            echo "REPO_URL=$DABLIN_REPO"
+            echo "SOFTWARE=DABlin"
+          } >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            build-essential cmake \
+            libfaad-dev libmpg123-dev libsdl2-dev \
+            ca-certificates curl git
+
+          if [ "${{ matrix.build }}" = "gtk" ]; then
+            apt-get install -y --no-install-recommends libgtkmm-3.0-dev
+          fi
+
+          apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+      - name: Download or clone DABlin
+        run: |
+          # Check if BRANCH starts with 'v' or is a version number
+          if [[ "${BRANCH}" =~ ^v?[0-9] ]]; then
+            echo "Downloading tag ${BRANCH} from ${REPO_URL}"
+            curl -L "${REPO_URL}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
+            mv dablin-* dablin
+          else
+            echo "Cloning branch ${BRANCH} from ${REPO_URL}"
+            git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}.git"
+          fi
+
+      - name: Build DABlin
+        working-directory: dablin
+        run: |
+          mkdir build
+          cd build
+
+          if [ "${{ matrix.build }}" = "gtk" ]; then
+            cmake .. -DUSE_GUI=ON
+          else
+            cmake .. -DUSE_GUI=OFF
+          fi
+
+          make -j"$(nproc)"
+
+      - name: Prepare output directory
+        run: mkdir -p output
+
+      - name: Copy built binaries to output directory
+        working-directory: dablin/build
+        run: |
+          if [ "${{ matrix.build }}" = "gtk" ]; then
+            BINARY_NAME="dablin-${{ env.VERSION }}-gtk-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ -f dablin_gtk ]; then
+              cp dablin_gtk "../../output/$BINARY_NAME"
+            elif [ -f src/dablin_gtk ]; then
+              cp src/dablin_gtk "../../output/$BINARY_NAME"
+            else
+              echo "Build failed: dablin_gtk not found!" && exit 1
+            fi
+          else
+            # CLI version only
+            CLI_BINARY_NAME="dablin-${{ env.VERSION }}-cli-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ -f dablin ]; then
+              cp dablin "../../output/$CLI_BINARY_NAME"
+            elif [ -f src/dablin ]; then
+              cp src/dablin "../../output/$CLI_BINARY_NAME"
+            else
+              echo "Build failed: dablin not found!" && exit 1
+            fi
+          fi
+
+      - name: Upload DABlin Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
+          path: output/*
+
+  build_dablin_macos:
+    name: Build DABlin Artifact (macOS)
+    runs-on: ${{ matrix.runner }}
+    if: ${{ inputs.build_dablin }}
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            arch: "amd64"
+            runner: "macos-15-intel"
+            build: cli
+          - os: macos
+            arch: "amd64"
+            runner: "macos-15-intel"
+            build: gtk
+          - os: macos
+            arch: "arm64"
+            runner: "macos-15"
+            build: cli
+          - os: macos
+            arch: "arm64"
+            runner: "macos-15"
+            build: gtk
+    steps:
+      - name: Checkout repository (for build.env file)
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
+
+      - name: Load configuration
+        run: |
+          # Source build.env file
+          set -a
+          . ./build.env
+          set +a
+
+          # Export to environment
+          {
+            echo "VERSION=$DABLIN_VERSION"
+            echo "BRANCH=$DABLIN_BRANCH"
+            echo "REPO_URL=$DABLIN_REPO"
+            echo "SOFTWARE=DABlin"
+          } >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: |
+          brew install cmake faad2 mpg123 sdl2
+
+          if [ "${{ matrix.build }}" = "gtk" ]; then
+            brew install gtkmm3
+          fi
+
+      - name: Download or clone DABlin
+        run: |
+          # Check if BRANCH starts with 'v' or is a version number
+          if [[ "${BRANCH}" =~ ^v?[0-9] ]]; then
+            echo "Downloading tag ${BRANCH} from ${REPO_URL}"
+            curl -L "${REPO_URL}/archive/refs/tags/${BRANCH}.tar.gz" | tar -xz
+            mv dablin-* dablin
+          else
+            echo "Cloning branch ${BRANCH} from ${REPO_URL}"
+            git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}.git"
+          fi
+
+      - name: Build DABlin
+        working-directory: dablin
+        run: |
+          mkdir build
+          cd build
+
+          if [ "${{ matrix.build }}" = "gtk" ]; then
+            cmake .. -DUSE_GUI=ON
+          else
+            cmake .. -DUSE_GUI=OFF
+          fi
+
+          make -j"$(sysctl -n hw.ncpu)"
+
+      - name: Prepare output directory
+        run: mkdir -p output
+
+      - name: Copy built binaries to output directory
+        working-directory: dablin/build
+        run: |
+          if [ "${{ matrix.build }}" = "gtk" ]; then
+            BINARY_NAME="dablin-${{ env.VERSION }}-gtk-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ -f dablin_gtk ]; then
+              cp dablin_gtk "../../output/$BINARY_NAME"
+            elif [ -f src/dablin_gtk ]; then
+              cp src/dablin_gtk "../../output/$BINARY_NAME"
+            else
+              echo "Build failed: dablin_gtk not found!" && exit 1
+            fi
+          else
+            # CLI version only
+            CLI_BINARY_NAME="dablin-${{ env.VERSION }}-cli-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ -f dablin ]; then
+              cp dablin "../../output/$CLI_BINARY_NAME"
+            elif [ -f src/dablin ]; then
+              cp src/dablin "../../output/$CLI_BINARY_NAME"
+            else
+              echo "Build failed: dablin not found!" && exit 1
+            fi
+          fi
+
+      - name: Upload DABlin Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
+          path: output/*
+
   ##################################
   # Release Jobs
   ##################################
@@ -554,4 +836,46 @@ jobs:
           files: dabmux/**
           tag_name: odr-dabmux-${{ env.VERSION }}
           name: "ODR-DabMux ${{ env.VERSION }}"
+          generate_release_notes: false
+
+  release_dablin:
+    name: Create GitHub Release for DABlin
+    runs-on: ubuntu-24.04
+    needs: [build_dablin_linux, build_dablin_macos]
+    if: ${{ inputs.build_dablin && !cancelled() && !failure() }}
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Load version
+        run: |
+          # Source build.env file
+          set -a
+          . ./build.env
+          set +a
+
+          echo "VERSION=$DABLIN_VERSION" >> "$GITHUB_ENV"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: all_artifacts
+
+      - name: Organize DABlin artifacts
+        run: |
+          mkdir -p dablin
+          mv all_artifacts/dablin-* dablin/ || true
+          ls -l dablin
+
+      - name: Create DABlin Release and Upload Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dablin/**
+          tag_name: dablin-${{ env.VERSION }}
+          name: "DABlin ${{ env.VERSION }}"
           generate_release_notes: false
