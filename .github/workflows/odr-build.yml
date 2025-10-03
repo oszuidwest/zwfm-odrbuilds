@@ -569,18 +569,26 @@ jobs:
       - name: Copy built binaries to output directory
         working-directory: dablin/build
         run: |
+          # Debug: List all files in the build directory
+          echo "Contents of build directory:"
+          ls -la
+
           if [ "${{ matrix.build }}" = "gtk" ]; then
             BINARY_NAME="dablin-${{ env.VERSION }}-gtk-${{ matrix.os }}-${{ matrix.arch }}"
-            if [ -f dablin-gtk ]; then
-              cp dablin-gtk "../../output/$BINARY_NAME"
+            if [ -f dablin_gtk ]; then
+              cp dablin_gtk "../../output/$BINARY_NAME"
+            elif [ -f src/dablin_gtk ]; then
+              cp src/dablin_gtk "../../output/$BINARY_NAME"
             else
-              echo "Build failed: dablin-gtk not found!" && exit 1
+              echo "Build failed: dablin_gtk not found!" && exit 1
             fi
           else
             # CLI version only
             CLI_BINARY_NAME="dablin-${{ env.VERSION }}-cli-${{ matrix.os }}-${{ matrix.arch }}"
             if [ -f dablin ]; then
               cp dablin "../../output/$CLI_BINARY_NAME"
+            elif [ -f src/dablin ]; then
+              cp src/dablin "../../output/$CLI_BINARY_NAME"
             else
               echo "Build failed: dablin not found!" && exit 1
             fi
@@ -678,18 +686,26 @@ jobs:
       - name: Copy built binaries to output directory
         working-directory: dablin/build
         run: |
+          # Debug: List all files in the build directory
+          echo "Contents of build directory:"
+          ls -la
+
           if [ "${{ matrix.build }}" = "gtk" ]; then
             BINARY_NAME="dablin-${{ env.VERSION }}-gtk-${{ matrix.os }}-${{ matrix.arch }}"
-            if [ -f dablin-gtk ]; then
-              cp dablin-gtk "../../output/$BINARY_NAME"
+            if [ -f dablin_gtk ]; then
+              cp dablin_gtk "../../output/$BINARY_NAME"
+            elif [ -f src/dablin_gtk ]; then
+              cp src/dablin_gtk "../../output/$BINARY_NAME"
             else
-              echo "Build failed: dablin-gtk not found!" && exit 1
+              echo "Build failed: dablin_gtk not found!" && exit 1
             fi
           else
             # CLI version only
             CLI_BINARY_NAME="dablin-${{ env.VERSION }}-cli-${{ matrix.os }}-${{ matrix.arch }}"
             if [ -f dablin ]; then
               cp dablin "../../output/$CLI_BINARY_NAME"
+            elif [ -f src/dablin ]; then
+              cp src/dablin "../../output/$CLI_BINARY_NAME"
             else
               echo "Build failed: dablin not found!" && exit 1
             fi
