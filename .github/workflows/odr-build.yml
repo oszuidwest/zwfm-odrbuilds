@@ -601,11 +601,11 @@ jobs:
         include:
           - os: macos
             arch: "amd64"
-            runner: "macos-15-large"
+            runner: "macos-15-intel"
             build: cli
           - os: macos
             arch: "amd64"
-            runner: "macos-15-large"
+            runner: "macos-15-intel"
             build: gtk
           - os: macos
             arch: "arm64"
