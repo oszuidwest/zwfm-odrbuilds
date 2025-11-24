@@ -45,7 +45,7 @@ jobs:
       organization: ${{ steps.env.outputs.organization }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Load environment variables
         id: env
@@ -120,7 +120,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Load environment variables
         id: env
