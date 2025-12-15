@@ -16,9 +16,6 @@ These precompiled binaries are designed for easy integration into your scripts o
 The binaries are built for multiple operating systems and architectures:
 
 ### ODR-PadEnc
-- Debian 12 (Bookworm) - filename: `debian12`
-  - AMD64
-  - ARM64
 - Debian 13 (Trixie) - filename: `debian13`
   - AMD64
   - ARM64
@@ -29,9 +26,6 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64
 
 ### ODR-AudioEnc
-- Debian 12 (Bookworm) - filename: `debian12`
-  - AMD64: Minimal and Full builds
-  - ARM64: Minimal and Full builds
 - Debian 13 (Trixie) - filename: `debian13`
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
@@ -42,9 +36,6 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64: Minimal and Full builds
 
 ### ODR-DabMux
-- Debian 12 (Bookworm) - filename: `debian12`
-  - AMD64
-  - ARM64
 - Debian 13 (Trixie) - filename: `debian13`
   - AMD64
   - ARM64
@@ -55,9 +46,6 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64
 
 ### DABlin
-- Debian 12 (Bookworm) - filename: `debian12`
-  - AMD64: CLI and GTK builds
-  - ARM64: CLI and GTK builds
 - Debian 13 (Trixie) - filename: `debian13`
   - AMD64: CLI and GTK builds
   - ARM64: CLI and GTK builds
@@ -76,14 +64,13 @@ The binaries are built for multiple operating systems and architectures:
 Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page of this repository. Each binary follows a naming convention that includes the tool name, version, operating system, and architecture:
 
 **Naming Examples:**
-- `odr-padenc-v3.1.0-debian12-amd64` (Debian 12)
 - `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
 - `odr-padenc-v3.1.0-ubuntu2404-amd64` (Ubuntu 24.04)
 - `odr-padenc-v3.1.0-alpine322-amd64` (Alpine 3.22)
-- `odr-audioenc-next-minimal-debian12-amd64` (AudioEnc with variant)
+- `odr-audioenc-next-minimal-debian13-amd64` (AudioEnc with variant)
 - `odr-audioenc-next-full-ubuntu2404-arm64` (AudioEnc full variant)
 - `odr-dabmux-v5.4.1-ubuntu2404-amd64` (DabMux)
-- `dablin-v1.16.1-cli-debian12-amd64` (DABlin CLI)
+- `dablin-v1.16.1-cli-debian13-amd64` (DABlin CLI)
 - `dablin-v1.16.1-gtk-ubuntu2404-arm64` (DABlin GTK)
 - `dablin-v1.16.1-cli-macos-arm64` (DABlin macOS)
 
@@ -91,8 +78,8 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 
 ```bash
 #!/bin/bash
-# Download ODR-PadEnc binary for Debian 12 amd64
-wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-debian12-amd64 -O odr-padenc
+# Download ODR-PadEnc binary for Debian 13 amd64
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-debian13-amd64 -O odr-padenc
 chmod +x odr-padenc
 
 # Run the tool
