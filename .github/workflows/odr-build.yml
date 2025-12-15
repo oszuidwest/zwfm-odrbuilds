@@ -142,7 +142,7 @@ jobs:
           fi
 
       - name: Upload ODR-PadEnc Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: odr-padenc-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/odr-padenc-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
@@ -310,7 +310,7 @@ jobs:
           fi
 
       - name: Upload ODR-AudioEnc Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: odr-audioenc-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/odr-audioenc-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
@@ -427,7 +427,7 @@ jobs:
           fi
 
       - name: Upload ODR-DabMux Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/odr-dabmux-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
@@ -591,7 +591,7 @@ jobs:
           fi
 
       - name: Upload DABlin Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/*
@@ -704,7 +704,7 @@ jobs:
           fi
 
       - name: Upload DABlin Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dablin-${{ env.VERSION }}-${{ matrix.build }}-${{ matrix.os }}-${{ matrix.arch }}
           path: output/*
