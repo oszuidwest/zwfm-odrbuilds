@@ -36,6 +36,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
 
+      - name: Load build environment
+        id: env
+        run: |
+          set -a
+          . ./build.env
+          set +a
+          echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -48,6 +56,9 @@ jobs:
           pull: true
           load: true
           tags: ${{ github.repository }}:scan
+          build-args: |
+            TOOL=odr-padenc
+            VERSION=${{ steps.env.outputs.ODR_PADENC_VERSION }}
 
       - name: Cache Trivy DB
         uses: actions/cache@v5
