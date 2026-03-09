@@ -230,7 +230,7 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.decision.outputs.should_build == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/Dockerfile
