@@ -216,7 +216,7 @@ jobs:
       - name: Extract metadata
         if: steps.decision.outputs.should_build == 'true'
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}
           tags: |
