@@ -30,7 +30,6 @@ The binaries are built for multiple operating systems and architectures:
   - ARM64
 - Alpine 3.23 - filename: `alpine323`
   - AMD64
-  - ARM64
 
 ### ODR-AudioEnc
 - Debian 12 (Bookworm) - filename: `debian12`
@@ -47,7 +46,6 @@ The binaries are built for multiple operating systems and architectures:
   - ARM64: Minimal and Full builds
 - Alpine 3.23 - filename: `alpine323`
   - AMD64: Minimal and Full builds
-  - ARM64: Minimal and Full builds
 
 ### ODR-DabMux
 - Debian 12 (Bookworm) - filename: `debian12`
@@ -64,7 +62,6 @@ The binaries are built for multiple operating systems and architectures:
   - ARM64
 - Alpine 3.23 - filename: `alpine323`
   - AMD64
-  - ARM64
 
 ### DABlin
 - Debian 12 (Bookworm) - filename: `debian12`
@@ -83,6 +80,7 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64 (Intel): CLI and GTK builds
   - ARM64 (Apple Silicon): CLI and GTK builds
 
+**Note:** ARM64 builds are not available for Alpine due to current limitations in GitHub Actions runners.
 
 ## Using the Prebuilt ODR Tools
 

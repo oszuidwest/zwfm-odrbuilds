@@ -77,10 +77,6 @@ jobs:
             image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
@@ -258,16 +254,6 @@ jobs:
             arch: "amd64"
             runner: "ubuntu-24.04"
             build: full
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
-            build: minimal
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
-            build: full
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
@@ -403,10 +389,6 @@ jobs:
             image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
