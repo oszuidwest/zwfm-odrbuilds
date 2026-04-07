@@ -39,6 +39,7 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -77,10 +78,6 @@ jobs:
             image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
@@ -166,6 +163,7 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -257,16 +255,6 @@ jobs:
             image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
-            build: full
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
-            build: minimal
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
             build: full
     steps:
       - name: Checkout repository (for build.env file)
@@ -365,6 +353,7 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -403,10 +392,6 @@ jobs:
             image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
-          - os: alpine323
-            image: "alpine:3.23"
-            arch: "arm64"
-            runner: "ubuntu-24.04-arm"
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
@@ -503,6 +488,7 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -685,6 +671,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     if: ${{ inputs.build_dablin }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos
