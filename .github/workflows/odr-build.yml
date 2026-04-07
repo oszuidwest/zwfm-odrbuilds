@@ -39,7 +39,6 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -163,7 +162,6 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -353,7 +351,6 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -488,7 +485,6 @@ jobs:
     container:
       image: ${{ matrix.image }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - os: debian12
@@ -671,7 +667,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
     if: ${{ inputs.build_dablin }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - os: macos
