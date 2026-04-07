@@ -443,6 +443,15 @@ jobs:
       - name: Build ODR-DabMux
         working-directory: ODR-DabMux
         run: |
+          # Workaround: Boost >= 1.69 made boost_system header-only.
+          # Some distros (e.g. Ubuntu 26.04 with Boost 1.90) no longer ship libboost_system.so.
+          # See: https://github.com/Opendigitalradio/ODR-DabMux/issues/90
+          if ! find /usr -name "libboost_system*.so*" -o -name "libboost_system*.a" 2>/dev/null | grep -q .; then
+            echo "No Boost::System library found, applying header-only workaround"
+            sed -i 's/^AX_BOOST_SYSTEM$/# AX_BOOST_SYSTEM - skipped, header-only/' configure.ac
+            sed -i 's/$(BOOST_SYSTEM_LIB)//' Makefile.am
+          fi
+
           ./bootstrap.sh
           ./configure
           make -j"$(nproc)"
