@@ -65,6 +65,14 @@ jobs:
             image: "ubuntu:24.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
           - os: alpine322
             image: "alpine:3.22"
             arch: "amd64"
@@ -216,6 +224,26 @@ jobs:
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: minimal
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: full
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: minimal
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: full
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: minimal
           - os: alpine322
             image: "alpine:3.22"
             arch: "amd64"
@@ -348,6 +376,14 @@ jobs:
             image: "ubuntu:24.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
           - os: alpine322
             image: "alpine:3.22"
             arch: "amd64"
@@ -407,6 +443,15 @@ jobs:
       - name: Build ODR-DabMux
         working-directory: ODR-DabMux
         run: |
+          # Workaround: Boost >= 1.69 made boost_system header-only.
+          # Some distros (e.g. Ubuntu 26.04 with Boost 1.90) no longer ship libboost_system.so.
+          # See: https://github.com/Opendigitalradio/ODR-DabMux/issues/90
+          if ! find /usr -name "libboost_system*.so*" -o -name "libboost_system*.a" 2>/dev/null | grep -q .; then
+            echo "No Boost::System library found, applying header-only workaround"
+            sed -i 's/^AX_BOOST_SYSTEM$/# AX_BOOST_SYSTEM - skipped, header-only/' configure.ac
+            sed -i 's/$(BOOST_SYSTEM_LIB)//' Makefile.am
+          fi
+
           ./bootstrap.sh
           ./configure
           make -j"$(nproc)"
@@ -498,6 +543,26 @@ jobs:
             build: cli
           - os: ubuntu2404
             image: "ubuntu:24.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: gtk
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: cli
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: gtk
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: cli
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: gtk
