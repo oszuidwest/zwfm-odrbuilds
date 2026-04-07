@@ -25,6 +25,9 @@ The binaries are built for multiple operating systems and architectures:
 - Ubuntu 24.04 LTS - filename: `ubuntu2404`
   - AMD64
   - ARM64
+- Ubuntu 26.04 LTS - filename: `ubuntu2604`
+  - AMD64
+  - ARM64
 - Alpine 3.22 - filename: `alpine322`
   - AMD64
 
@@ -36,6 +39,9 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
 - Ubuntu 24.04 LTS - filename: `ubuntu2404`
+  - AMD64: Minimal and Full builds
+  - ARM64: Minimal and Full builds
+- Ubuntu 26.04 LTS - filename: `ubuntu2604`
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
 - Alpine 3.22 - filename: `alpine322`
@@ -51,6 +57,9 @@ The binaries are built for multiple operating systems and architectures:
 - Ubuntu 24.04 LTS - filename: `ubuntu2404`
   - AMD64
   - ARM64
+- Ubuntu 26.04 LTS - filename: `ubuntu2604`
+  - AMD64
+  - ARM64
 - Alpine 3.22 - filename: `alpine322`
   - AMD64
 
@@ -62,6 +71,9 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64: CLI and GTK builds
   - ARM64: CLI and GTK builds
 - Ubuntu 24.04 LTS - filename: `ubuntu2404`
+  - AMD64: CLI and GTK builds
+  - ARM64: CLI and GTK builds
+- Ubuntu 26.04 LTS - filename: `ubuntu2604`
   - AMD64: CLI and GTK builds
   - ARM64: CLI and GTK builds
 - macOS - filename: `macos`

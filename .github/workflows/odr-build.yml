@@ -65,6 +65,14 @@ jobs:
             image: "ubuntu:24.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
           - os: alpine322
             image: "alpine:3.22"
             arch: "amd64"
@@ -216,6 +224,26 @@ jobs:
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: minimal
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: full
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: minimal
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: full
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: minimal
           - os: alpine322
             image: "alpine:3.22"
             arch: "amd64"
@@ -346,6 +374,14 @@ jobs:
             runner: "ubuntu-24.04"
           - os: ubuntu2404
             image: "ubuntu:24.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
           - os: alpine322
@@ -498,6 +534,26 @@ jobs:
             build: cli
           - os: ubuntu2404
             image: "ubuntu:24.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: gtk
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: cli
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "amd64"
+            runner: "ubuntu-24.04"
+            build: gtk
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: cli
+          - os: ubuntu2604
+            image: "ubuntu:26.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: gtk
