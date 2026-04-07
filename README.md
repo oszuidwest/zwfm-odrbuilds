@@ -28,8 +28,9 @@ The binaries are built for multiple operating systems and architectures:
 - Ubuntu 26.04 LTS - filename: `ubuntu2604`
   - AMD64
   - ARM64
-- Alpine 3.22 - filename: `alpine322`
+- Alpine 3.23 - filename: `alpine323`
   - AMD64
+  - ARM64
 
 ### ODR-AudioEnc
 - Debian 12 (Bookworm) - filename: `debian12`
@@ -44,8 +45,9 @@ The binaries are built for multiple operating systems and architectures:
 - Ubuntu 26.04 LTS - filename: `ubuntu2604`
   - AMD64: Minimal and Full builds
   - ARM64: Minimal and Full builds
-- Alpine 3.22 - filename: `alpine322`
+- Alpine 3.23 - filename: `alpine323`
   - AMD64: Minimal and Full builds
+  - ARM64: Minimal and Full builds
 
 ### ODR-DabMux
 - Debian 12 (Bookworm) - filename: `debian12`
@@ -60,8 +62,9 @@ The binaries are built for multiple operating systems and architectures:
 - Ubuntu 26.04 LTS - filename: `ubuntu2604`
   - AMD64
   - ARM64
-- Alpine 3.22 - filename: `alpine322`
+- Alpine 3.23 - filename: `alpine323`
   - AMD64
+  - ARM64
 
 ### DABlin
 - Debian 12 (Bookworm) - filename: `debian12`
@@ -80,7 +83,6 @@ The binaries are built for multiple operating systems and architectures:
   - AMD64 (Intel): CLI and GTK builds
   - ARM64 (Apple Silicon): CLI and GTK builds
 
-**Note:** ARM64 builds are not available for Alpine due to current limitations in GitHub Actions runners.
 
 ## Using the Prebuilt ODR Tools
 
@@ -91,7 +93,7 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 - `odr-padenc-v3.1.0-debian12-amd64` (Debian 12)
 - `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
 - `odr-padenc-v3.1.0-ubuntu2404-amd64` (Ubuntu 24.04)
-- `odr-padenc-v3.1.0-alpine322-amd64` (Alpine 3.22)
+- `odr-padenc-v3.1.0-alpine323-amd64` (Alpine 3.23)
 - `odr-audioenc-next-minimal-debian12-amd64` (AudioEnc with variant)
 - `odr-audioenc-next-full-ubuntu2404-arm64` (AudioEnc full variant)
 - `odr-dabmux-v5.4.1-ubuntu2404-amd64` (DabMux)
@@ -113,8 +115,8 @@ chmod +x odr-padenc
 # Or download Ubuntu 24.04 version
 wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-ubuntu2404-amd64 -O odr-padenc
 
-# Or download Alpine 3.22 version
-wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-alpine322-amd64 -O odr-padenc
+# Or download Alpine 3.23 version
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-alpine323-amd64 -O odr-padenc
 
 # Download DABlin CLI for Linux
 wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/dablin-v1.16.1/dablin-v1.16.1-cli-ubuntu2404-amd64 -O dablin

@@ -73,10 +73,14 @@ jobs:
             image: "ubuntu:26.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
-          - os: alpine322
-            image: "alpine:3.22"
+          - os: alpine323
+            image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
+          - os: alpine323
+            image: "alpine:3.23"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
@@ -102,7 +106,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ "${{ matrix.os }}" = "alpine322" ]; then
+          if [ -f /etc/alpine-release ]; then
             apk add --no-cache \
               build-base automake autoconf libtool \
               imagemagick-dev \
@@ -244,15 +248,25 @@ jobs:
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
             build: minimal
-          - os: alpine322
-            image: "alpine:3.22"
+          - os: alpine323
+            image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
             build: minimal
-          - os: alpine322
-            image: "alpine:3.22"
+          - os: alpine323
+            image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
+            build: full
+          - os: alpine323
+            image: "alpine:3.23"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
+            build: minimal
+          - os: alpine323
+            image: "alpine:3.23"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
             build: full
     steps:
       - name: Checkout repository (for build.env file)
@@ -279,9 +293,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ "${{ matrix.os }}" = "alpine322" ]; then
+          if [ -f /etc/alpine-release ]; then
             # Enable community repository
-            echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/community" >> /etc/apk/repositories
+            ALPINE_VERSION=$(cat /etc/alpine-release | cut -d. -f1-2)
+            echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community" >> /etc/apk/repositories
             apk update
             apk add --no-cache \
               build-base automake autoconf libtool \
@@ -384,10 +399,14 @@ jobs:
             image: "ubuntu:26.04"
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
-          - os: alpine322
-            image: "alpine:3.22"
+          - os: alpine323
+            image: "alpine:3.23"
             arch: "amd64"
             runner: "ubuntu-24.04"
+          - os: alpine323
+            image: "alpine:3.23"
+            arch: "arm64"
+            runner: "ubuntu-24.04-arm"
     steps:
       - name: Checkout repository (for build.env file)
         uses: actions/checkout@v6
@@ -413,7 +432,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ "${{ matrix.os }}" = "alpine322" ]; then
+          if [ -f /etc/alpine-release ]; then
             apk add --no-cache \
               build-base automake autoconf libtool \
               zeromq-dev \
