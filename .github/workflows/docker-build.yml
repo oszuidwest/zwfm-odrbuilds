@@ -50,7 +50,6 @@ jobs:
       - name: Load environment variables
         id: env
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
@@ -123,20 +122,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Load environment variables
-        id: env
         run: |
-          # Source build.env file and export to GitHub environment
           set -a
           . ./build.env
           set +a
 
-          # Export to GitHub environment for use in subsequent steps
           {
             echo "REGISTRY=${{ needs.prepare.outputs.registry }}"
             echo "ORGANIZATION=${{ needs.prepare.outputs.organization }}"
-            echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
-            echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
-            echo "ODR_DABMUX_VERSION=$ODR_DABMUX_VERSION"
           } >> "$GITHUB_ENV"
 
           # Set version based on tool
