@@ -87,12 +87,10 @@ jobs:
 
       - name: Load configuration
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
 
-          # Export to environment
           {
             echo "VERSION=$ODR_PADENC_VERSION"
             echo "BRANCH=$ODR_PADENC_BRANCH"
@@ -264,12 +262,10 @@ jobs:
 
       - name: Load configuration
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
 
-          # Export to environment
           {
             echo "VERSION=$ODR_AUDIOENC_VERSION"
             echo "BRANCH=$ODR_AUDIOENC_BRANCH"
@@ -280,23 +276,27 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f /etc/alpine-release ]; then
-            # Enable community repository
             ALPINE_VERSION=$(cat /etc/alpine-release | cut -d. -f1-2)
             echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community" >> /etc/apk/repositories
             apk update
             apk add --no-cache \
               build-base automake autoconf libtool \
-              zeromq-dev \
-              alsa-lib-dev jack-dev vlc-dev \
-              gstreamer-dev gst-plugins-base-dev \
-              curl-dev curl git
+              zeromq-dev curl-dev curl git
+            if [ "${{ matrix.build }}" = "full" ]; then
+              apk add --no-cache \
+                alsa-lib-dev jack-dev vlc-dev \
+                gstreamer-dev gst-plugins-base-dev
+            fi
           else
             apt-get update && apt-get install -y --no-install-recommends \
               build-essential automake libtool \
               libzmq3-dev libzmq5 \
-              libasound2-dev libjack-jackd2-dev libvlc-dev \
-              libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-              libcurl4-openssl-dev ca-certificates curl git && \
+              libcurl4-openssl-dev ca-certificates curl git
+            if [ "${{ matrix.build }}" = "full" ]; then
+              apt-get install -y --no-install-recommends \
+                libasound2-dev libjack-jackd2-dev libvlc-dev \
+                libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+            fi
             apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
           fi
 
@@ -399,12 +399,10 @@ jobs:
 
       - name: Load configuration
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
 
-          # Export to environment
           {
             echo "VERSION=$ODR_DABMUX_VERSION"
             echo "BRANCH=$ODR_DABMUX_BRANCH"
@@ -577,12 +575,10 @@ jobs:
 
       - name: Load configuration
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
 
-          # Export to environment
           {
             echo "VERSION=$DABLIN_VERSION"
             echo "BRANCH=$DABLIN_BRANCH"
@@ -695,12 +691,10 @@ jobs:
 
       - name: Load configuration
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
 
-          # Export to environment
           {
             echo "VERSION=$DABLIN_VERSION"
             echo "BRANCH=$DABLIN_BRANCH"
@@ -785,37 +779,43 @@ jobs:
     if: ${{ inputs.build_padenc && !cancelled() && !failure() }}
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
 
       - name: Load version
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
-
           echo "VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_ENV"
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
-          path: all_artifacts
+          path: artifacts
+          pattern: odr-padenc-*
 
-      - name: Organize PadEnc artifacts
+      - name: Verify downloaded artifacts
         run: |
-          mkdir -p padenc
-          mv all_artifacts/odr-padenc-* padenc/ || true
-          ls -l padenc
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No ODR-PadEnc artifacts were downloaded" >&2
+            exit 1
+          fi
 
       - name: Create PadEnc Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2
         with:
-          files: padenc/**
+          files: artifacts/**
           tag_name: odr-padenc-${{ env.VERSION }}
           name: "ODR-PadEnc ${{ env.VERSION }}"
           generate_release_notes: false
@@ -827,37 +827,43 @@ jobs:
     if: ${{ inputs.build_audioenc && !cancelled() && !failure() }}
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
 
       - name: Load version
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
-
           echo "VERSION=$ODR_AUDIOENC_VERSION" >> "$GITHUB_ENV"
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
-          path: all_artifacts
+          path: artifacts
+          pattern: odr-audioenc-*
 
-      - name: Organize AudioEnc artifacts
+      - name: Verify downloaded artifacts
         run: |
-          mkdir -p audioenc
-          mv all_artifacts/odr-audioenc-* audioenc/ || true
-          ls -l audioenc
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No ODR-AudioEnc artifacts were downloaded" >&2
+            exit 1
+          fi
 
       - name: Create AudioEnc Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2
         with:
-          files: audioenc/**
+          files: artifacts/**
           tag_name: odr-audioenc-${{ env.VERSION }}
           name: "ODR-AudioEnc ${{ env.VERSION }}"
           generate_release_notes: false
@@ -869,37 +875,43 @@ jobs:
     if: ${{ inputs.build_dabmux && !cancelled() && !failure() }}
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
 
       - name: Load version
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
-
           echo "VERSION=$ODR_DABMUX_VERSION" >> "$GITHUB_ENV"
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
-          path: all_artifacts
+          path: artifacts
+          pattern: odr-dabmux-*
 
-      - name: Organize DabMux artifacts
+      - name: Verify downloaded artifacts
         run: |
-          mkdir -p dabmux
-          mv all_artifacts/odr-dabmux-* dabmux/ || true
-          ls -l dabmux
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No ODR-DabMux artifacts were downloaded" >&2
+            exit 1
+          fi
 
       - name: Create DabMux Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2
         with:
-          files: dabmux/**
+          files: artifacts/**
           tag_name: odr-dabmux-${{ env.VERSION }}
           name: "ODR-DabMux ${{ env.VERSION }}"
           generate_release_notes: false
@@ -911,37 +923,43 @@ jobs:
     if: ${{ inputs.build_dablin && !cancelled() && !failure() }}
     permissions:
       contents: write
-      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            build.env
+          sparse-checkout-cone-mode: false
 
       - name: Load version
         run: |
-          # Source build.env file
           set -a
           . ./build.env
           set +a
-
           echo "VERSION=$DABLIN_VERSION" >> "$GITHUB_ENV"
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
-          path: all_artifacts
+          path: artifacts
+          pattern: dablin-*
 
-      - name: Organize DABlin artifacts
+      - name: Verify downloaded artifacts
         run: |
-          mkdir -p dablin
-          mv all_artifacts/dablin-* dablin/ || true
-          ls -l dablin
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No DABlin artifacts were downloaded" >&2
+            exit 1
+          fi
 
       - name: Create DABlin Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2
         with:
-          files: dablin/**
+          files: artifacts/**
           tag_name: dablin-${{ env.VERSION }}
           name: "DABlin ${{ env.VERSION }}"
           generate_release_notes: false

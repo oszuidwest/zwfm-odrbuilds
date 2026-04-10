@@ -8,14 +8,14 @@ ARG OS_VARIANT=debian13
 ARG TARGETARCH
 
 # Validate required args
-RUN test -n "$TOOL" || (echo "TOOL build arg is required" && exit 1)
-RUN test -n "$VERSION" || (echo "VERSION build arg is required" && exit 1)
+RUN if [ -z "$TOOL" ]; then echo "TOOL build arg is required"; exit 1; fi; \
+    if [ -z "$VERSION" ]; then echo "VERSION build arg is required"; exit 1; fi
 
 ENV REPO="oszuidwest/zwfm-odrbuilds"
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl file && \
+    ca-certificates curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /download
@@ -30,9 +30,7 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TOOL}-${VERSION}/${BINARY_NAME}" && \
     echo "From: ${DOWNLOAD_URL}" && \
     curl -L --fail -o "${TOOL}" "${DOWNLOAD_URL}" && \
-    echo "Downloaded successfully, checking file..." && \
     ls -la "${TOOL}" && \
-    file "${TOOL}" && \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies
@@ -41,22 +39,20 @@ FROM debian:trixie-slim AS runtime
 ARG TOOL
 ARG VARIANT=""
 
-# Install base dependencies that all tools need
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install tool-specific runtime dependencies
-RUN if [ "$TOOL" = "odr-padenc" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libmagickwand-7.q16-10 locales && \
+# Install base + tool-specific runtime dependencies in a single layer
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    if [ "$TOOL" = "odr-padenc" ]; then \
+        apt-get install -y --no-install-recommends libmagickwand-7.q16-10 locales && \
         sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
         locale-gen; \
     elif [ "$TOOL" = "odr-dabmux" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libzmq5 libboost-system1.83.0 libcurl4t64; \
+        apt-get install -y --no-install-recommends libzmq5 libboost-system1.83.0 libcurl4t64; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "minimal" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends libzmq5 libcurl4t64 openssl; \
+        apt-get install -y --no-install-recommends libzmq5 libcurl4t64 openssl; \
     elif [ "$TOOL" = "odr-audioenc" ] && [ "$VARIANT" = "full" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends \
-            libzmq5 libcurl4t64 libasound2t64 libjack0 libvlc5 vlc libvlc-dev \
+        apt-get install -y --no-install-recommends \
+            libzmq5 libcurl4t64 libasound2t64 libjack0 libvlc5 vlc \
             libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 openssl; \
     fi && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
