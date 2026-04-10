@@ -120,6 +120,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            build.env
+            docker
+          sparse-checkout-cone-mode: false
 
       - name: Load environment variables
         run: |

@@ -8,8 +8,8 @@ ARG OS_VARIANT=debian13
 ARG TARGETARCH
 
 # Validate required args
-RUN test -n "$TOOL" || (echo "TOOL build arg is required" && exit 1) && \
-    test -n "$VERSION" || (echo "VERSION build arg is required" && exit 1)
+RUN if [ -z "$TOOL" ]; then echo "TOOL build arg is required"; exit 1; fi; \
+    if [ -z "$VERSION" ]; then echo "VERSION build arg is required"; exit 1; fi
 
 ENV REPO="oszuidwest/zwfm-odrbuilds"
 
@@ -30,6 +30,7 @@ RUN if [ "$TOOL" = "odr-padenc" ] || [ "$TOOL" = "odr-dabmux" ]; then \
     DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TOOL}-${VERSION}/${BINARY_NAME}" && \
     echo "From: ${DOWNLOAD_URL}" && \
     curl -L --fail -o "${TOOL}" "${DOWNLOAD_URL}" && \
+    ls -la "${TOOL}" && \
     chmod +x "${TOOL}"
 
 # Runtime stage with conditional dependencies

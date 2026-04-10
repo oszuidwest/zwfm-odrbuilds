@@ -800,6 +800,16 @@ jobs:
           path: artifacts
           pattern: odr-padenc-*
 
+      - name: Verify downloaded artifacts
+        run: |
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No ODR-PadEnc artifacts were downloaded" >&2
+            exit 1
+          fi
+
       - name: Create PadEnc Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -837,6 +847,16 @@ jobs:
         with:
           path: artifacts
           pattern: odr-audioenc-*
+
+      - name: Verify downloaded artifacts
+        run: |
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No ODR-AudioEnc artifacts were downloaded" >&2
+            exit 1
+          fi
 
       - name: Create AudioEnc Release and Upload Assets
         env:
@@ -876,6 +896,16 @@ jobs:
           path: artifacts
           pattern: odr-dabmux-*
 
+      - name: Verify downloaded artifacts
+        run: |
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No ODR-DabMux artifacts were downloaded" >&2
+            exit 1
+          fi
+
       - name: Create DabMux Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -913,6 +943,16 @@ jobs:
         with:
           path: artifacts
           pattern: dablin-*
+
+      - name: Verify downloaded artifacts
+        run: |
+          artifact_count=$(find artifacts -type f | wc -l)
+          echo "Downloaded ${artifact_count} artifact files"
+          find artifacts -type f -print
+          if [ "$artifact_count" -eq 0 ]; then
+            echo "No DABlin artifacts were downloaded" >&2
+            exit 1
+          fi
 
       - name: Create DABlin Release and Upload Assets
         env:
