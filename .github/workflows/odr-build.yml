@@ -813,7 +813,7 @@ jobs:
       - name: Create PadEnc Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: artifacts/**
           tag_name: odr-padenc-${{ env.VERSION }}
@@ -861,7 +861,7 @@ jobs:
       - name: Create AudioEnc Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: artifacts/**
           tag_name: odr-audioenc-${{ env.VERSION }}
@@ -909,7 +909,7 @@ jobs:
       - name: Create DabMux Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: artifacts/**
           tag_name: odr-dabmux-${{ env.VERSION }}
@@ -957,7 +957,7 @@ jobs:
       - name: Create DABlin Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: artifacts/**
           tag_name: dablin-${{ env.VERSION }}
