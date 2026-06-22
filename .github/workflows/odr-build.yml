@@ -79,7 +79,7 @@ jobs:
             runner: "ubuntu-24.04"
     steps:
       - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -254,7 +254,7 @@ jobs:
             build: full
     steps:
       - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -391,7 +391,7 @@ jobs:
             runner: "ubuntu-24.04"
     steps:
       - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -567,7 +567,7 @@ jobs:
             build: gtk
     steps:
       - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -683,7 +683,7 @@ jobs:
             build: gtk
     steps:
       - name: Checkout repository (for build.env file)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -781,7 +781,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -829,7 +829,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -877,7 +877,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
@@ -925,7 +925,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
