@@ -52,6 +52,7 @@ jobs:
             git checkout -B "$branch" origin/main
             sed -i "s|^${prefix}_VERSION=.*|${prefix}_VERSION=${version}|" build.env
             sed -i "s|^${prefix}_BRANCH=.*|${prefix}_BRANCH=${latest}|" build.env
+            ./scripts/sync-readme.sh
             git commit -am "$title"
             git push --force origin "$branch"
 
