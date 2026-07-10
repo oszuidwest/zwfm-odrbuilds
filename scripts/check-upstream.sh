@@ -25,6 +25,8 @@ cd "$(dirname "$0")/.."
 # lowercased prefix (ODR_PADENC -> odr-padenc). ODR tools tag as v3.1.0 and
 # DABlin as 1.16.1, so a release tag is any dotted version with an optional
 # 'v'; our release VERSION always keeps the 'v' (DABLIN_VERSION=v1.16.1).
+# odr-build.yml encodes the same tag-vs-branch split in its download steps
+# (^v[0-9] for ODR tools, ^v?[0-9] for DABlin) - keep them in sync.
 TAG_REGEX='^v?[0-9]+\.[0-9]+(\.[0-9]+)?$'
 
 # shellcheck disable=SC2013 # prefixes are single words, word-splitting is intended
@@ -40,12 +42,11 @@ for prefix in $(sed -n 's/^\([A-Z_]*\)_REPO=.*/\1/p' build.env); do
     continue
   fi
 
-  # grep is wrapped so a repo without matching tags hits the WARN path
-  # below instead of tripping pipefail
-  latest=$(git ls-remote --tags --refs "$repo" \
+  # git sorts the tags by version; grep is wrapped so a repo without
+  # matching tags hits the WARN path below instead of tripping pipefail
+  latest=$(git ls-remote --tags --refs --sort=v:refname "$repo" \
     | awk -F/ '{print $NF}' \
     | { grep -E "$TAG_REGEX" || true; } \
-    | sort -V \
     | tail -n1)
 
   if [ -z "$latest" ]; then
@@ -60,8 +61,7 @@ for prefix in $(sed -n 's/^\([A-Z_]*\)_REPO=.*/\1/p' build.env); do
     continue
   fi
 
-  version="$latest"
-  [[ "$version" == v* ]] || version="v${version}"
+  version="v${latest#v}"
 
   echo "UPDATE  ${tool}: ${current} -> ${latest}" >&2
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
