@@ -1,0 +1,60 @@
+---
+name: Auto-build on Version Change
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - build.env
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch:
+    name: Trigger build for changed tools
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed tools and trigger build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          before="${{ github.event.before }}"
+          git cat-file -e "$before" 2>/dev/null || before=HEAD^
+          # If build.env did not exist at $before, every value counts as changed
+          old=$(git show "$before:build.env" 2>/dev/null || true)
+
+          # Compare values instead of diff text so reordering lines in
+          # build.env does not trigger rebuilds
+          changed() {
+            [ "$(grep -E "^${1}_(VERSION|BRANCH)=" <<< "$old" | sort)" \
+              != "$(grep -E "^${1}_(VERSION|BRANCH)=" build.env | sort)" ]
+          }
+
+          # Tool prefixes come from build.env (same derivation as
+          # check-upstream.sh); a new tool without a matching build_* input
+          # in odr-build.yml makes gh workflow run fail loudly (HTTP 422)
+          # instead of being silently skipped
+          fields=()
+          any=false
+          # shellcheck disable=SC2013 # prefixes are single words
+          for prefix in $(sed -n 's/^\([A-Z_]*\)_REPO=.*/\1/p' build.env); do
+            if changed "$prefix"; then flag=true; any=true; else flag=false; fi
+            tool=$(tr '[:upper:]' '[:lower:]' <<< "${prefix#ODR_}")
+            echo "${tool}: changed=${flag}"
+            fields+=(--field "build_${tool}=${flag}")
+          done
+
+          if [ "$any" = false ]; then
+            echo "No tool versions changed, nothing to build"
+            exit 0
+          fi
+
+          gh workflow run odr-build.yml --ref main "${fields[@]}"
+          echo "Triggered odr-build.yml"
