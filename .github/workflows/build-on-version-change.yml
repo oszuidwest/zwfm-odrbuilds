@@ -29,10 +29,14 @@ jobs:
           if [ -z "$before" ] || ! git cat-file -e "$before" 2>/dev/null; then
             before=$(git rev-parse HEAD^)
           fi
-          diff=$(git diff "$before" "${{ github.sha }}" -- build.env)
+          # If build.env did not exist at $before, every value counts as changed
+          old=$(git show "$before:build.env" 2>/dev/null || true)
 
+          # Compare values instead of diff text so reordering lines in
+          # build.env does not trigger rebuilds
           changed() {
-            echo "$diff" | grep -qE "^[+-]${1}_(VERSION|BRANCH)="
+            [ "$(grep -E "^${1}_(VERSION|BRANCH)=" <<< "$old" | sort)" \
+              != "$(grep -E "^${1}_(VERSION|BRANCH)=" build.env | sort)" ]
           }
 
           padenc=$(changed ODR_PADENC && echo true || echo false)

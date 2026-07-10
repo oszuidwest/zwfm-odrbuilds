@@ -34,7 +34,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          while IFS=$'\t' read -r tool prefix current latest version; do
+          while IFS=$'\t' read -r tool prefix current latest version repo; do
             branch="upstream/${tool}"
             title="chore: update ${tool} to ${version}"
 
@@ -47,8 +47,6 @@ jobs:
               continue
             fi
 
-            repo=$(grep "^${prefix}_REPO=" build.env | cut -d= -f2)
-
             git checkout -B "$branch" origin/main
             sed -i "s|^${prefix}_VERSION=.*|${prefix}_VERSION=${version}|" build.env
             sed -i "s|^${prefix}_BRANCH=.*|${prefix}_BRANCH=${latest}|" build.env
@@ -56,21 +54,20 @@ jobs:
             git commit -am "$title"
             git push --force origin "$branch"
 
-            {
-              echo "Updates \`${tool}\` from \`${current}\` to upstream tag \`${latest}\`."
-              echo ""
-              echo "- Upstream tag: ${repo}/releases/tag/${latest}"
-              echo "- Changes: ${repo}/compare/${current}...${latest}"
-              echo ""
-              echo "After merging, the build workflow is triggered automatically for this tool."
-            } > pr-body.md
+            body=$(printf '%s\n' \
+              "Updates \`${tool}\` from \`${current}\` to upstream tag \`${latest}\`." \
+              "" \
+              "- Upstream tag: ${repo}/releases/tag/${latest}" \
+              "- Changes: ${repo}/compare/${current}...${latest}" \
+              "" \
+              "After merging, the build workflow is triggered automatically for this tool.")
 
             if [ -n "$existing" ]; then
-              gh pr edit "$branch" --title "$title" --body-file pr-body.md
+              gh pr edit "$branch" --title "$title" --body "$body"
               echo "Updated existing PR for ${tool} to ${version}"
             else
               gh pr create --base main --head "$branch" \
-                --title "$title" --body-file pr-body.md
+                --title "$title" --body "$body"
               echo "Created PR for ${tool} ${version}"
             fi
           done < updates.tsv
