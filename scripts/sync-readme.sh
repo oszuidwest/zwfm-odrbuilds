@@ -23,6 +23,12 @@ sync() {
     -e "s#(${slug}[-:])(v?[0-9][0-9.]*|next)#\1${version}#g" \
     README.md
   rm -f README.md.bak
+  # A README restyle that the patterns above no longer match would silently
+  # stop syncing this tool; demand that its reference still exists
+  grep -qE "(\*\*${label}\*\* \(|${slug}[-:])${version}" README.md || {
+    echo "ERROR: no ${label} ${version} reference left in README.md" >&2
+    exit 1
+  }
 }
 
 sync "ODR-PadEnc" "$ODR_PADENC_VERSION"
@@ -30,10 +36,11 @@ sync "ODR-AudioEnc" "$ODR_AUDIOENC_VERSION"
 sync "ODR-DabMux" "$ODR_DABMUX_VERSION"
 sync "DABlin" "$DABLIN_VERSION"
 
-# Tripwire: every v-prefixed version token left in the README must be one of
-# the build.env versions; anything else means a README restyle broke the
-# patterns above and versions would otherwise drift silently
-stale=$(grep -oE 'v[0-9][0-9.]*' README.md \
+# Tripwire: every version-shaped token (v + dotted digits) left in the
+# README must be one of the build.env versions; anything else is a stale
+# reference the patterns above no longer reach. Requiring the dot keeps
+# prose like "IPv6" out of the match.
+stale=$(grep -oE 'v[0-9]+\.[0-9][0-9.]*' README.md \
   | grep -vxF -e "$ODR_PADENC_VERSION" -e "$ODR_AUDIOENC_VERSION" \
       -e "$ODR_DABMUX_VERSION" -e "$DABLIN_VERSION" || true)
 if [ -n "$stale" ]; then

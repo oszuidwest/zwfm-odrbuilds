@@ -27,12 +27,14 @@ jobs:
         run: |
           before="${{ github.event.before }}"
           git cat-file -e "$before" 2>/dev/null || before=HEAD^
+          # If build.env did not exist at $before, every value counts as changed
+          old=$(git show "$before:build.env" 2>/dev/null || true)
 
-          # -G matches added/removed lines, so a brand-new build.env counts
-          # entirely as changed
+          # Compare values instead of diff text so reordering lines in
+          # build.env does not trigger rebuilds
           changed() {
-            ! git diff --quiet "$before" HEAD \
-              -G"^${1}_(VERSION|BRANCH)=" -- build.env
+            [ "$(grep -E "^${1}_(VERSION|BRANCH)=" <<< "$old" | sort)" \
+              != "$(grep -E "^${1}_(VERSION|BRANCH)=" build.env | sort)" ]
           }
 
           # Tool prefixes come from build.env (same derivation as
