@@ -1,0 +1,75 @@
+---
+name: Check Upstream Releases
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    name: Check for new upstream releases
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Check upstream releases
+        run: ./scripts/check-upstream.sh > updates.tsv
+
+      - name: Create or update pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -s updates.tsv ]; then
+            echo "All tools are up to date"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          while IFS=$'\t' read -r tool prefix current latest version; do
+            branch="upstream/${tool}"
+            title="chore: update ${tool} to ${version}"
+
+            # Skip if an open PR for this exact version already exists;
+            # an open PR for an older version is force-pushed and retitled
+            existing=$(gh pr list --head "$branch" --state open \
+              --json title --jq '.[0].title // empty')
+            if [ "$existing" = "$title" ]; then
+              echo "PR for ${tool} ${version} already open, skipping"
+              continue
+            fi
+
+            repo=$(grep "^${prefix}_REPO=" build.env | cut -d= -f2)
+
+            git checkout -B "$branch" origin/main
+            sed -i "s|^${prefix}_VERSION=.*|${prefix}_VERSION=${version}|" build.env
+            sed -i "s|^${prefix}_BRANCH=.*|${prefix}_BRANCH=${latest}|" build.env
+            git commit -am "$title"
+            git push --force origin "$branch"
+
+            {
+              echo "Updates \`${tool}\` from \`${current}\` to upstream tag \`${latest}\`."
+              echo ""
+              echo "- Upstream tag: ${repo}/releases/tag/${latest}"
+              echo "- Changes: ${repo}/compare/${current}...${latest}"
+              echo ""
+              echo "After merging, the build workflow is triggered automatically for this tool."
+            } > pr-body.md
+
+            if [ -n "$existing" ]; then
+              gh pr edit "$branch" --title "$title" --body-file pr-body.md
+              echo "Updated existing PR for ${tool} to ${version}"
+            else
+              gh pr create --base main --head "$branch" \
+                --title "$title" --body-file pr-body.md
+              echo "Created PR for ${tool} ${version}"
+            fi
+          done < updates.tsv

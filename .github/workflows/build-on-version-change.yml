@@ -1,0 +1,56 @@
+---
+name: Auto-build on Version Change
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - build.env
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch:
+    name: Trigger build for changed tools
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed tools and trigger build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          before="${{ github.event.before }}"
+          if [ -z "$before" ] || ! git cat-file -e "$before" 2>/dev/null; then
+            before=$(git rev-parse HEAD^)
+          fi
+          diff=$(git diff "$before" "${{ github.sha }}" -- build.env)
+
+          changed() {
+            echo "$diff" | grep -qE "^[+-]${1}_(VERSION|BRANCH)="
+          }
+
+          padenc=$(changed ODR_PADENC && echo true || echo false)
+          audioenc=$(changed ODR_AUDIOENC && echo true || echo false)
+          dabmux=$(changed ODR_DABMUX && echo true || echo false)
+          dablin=$(changed DABLIN && echo true || echo false)
+
+          echo "Changed tools: padenc=${padenc} audioenc=${audioenc} dabmux=${dabmux} dablin=${dablin}"
+
+          if [ "$padenc" = false ] && [ "$audioenc" = false ] && \
+             [ "$dabmux" = false ] && [ "$dablin" = false ]; then
+            echo "No tool versions changed, nothing to build"
+            exit 0
+          fi
+
+          gh workflow run odr-build.yml --ref main \
+            --field build_padenc="$padenc" \
+            --field build_audioenc="$audioenc" \
+            --field build_dabmux="$dabmux" \
+            --field build_dablin="$dablin"
+          echo "Triggered odr-build.yml"
