@@ -4,7 +4,7 @@ This repository contains tooling to automate the building and releasing of binar
 - **ODR-AudioEnc** (next) - Built from the 'next' branch at ODR.
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
-- **ODR-DabMux** (v5.4.1)
+- **ODR-DabMux** (v5.5.1)
 - **DABlin** (v1.16.1) - DAB/DAB+ receiver
   - CLI build (command-line interface)
   - GTK build (graphical user interface)
@@ -94,7 +94,7 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 - `odr-padenc-v3.1.0-alpine323-amd64` (Alpine 3.23)
 - `odr-audioenc-next-minimal-debian12-amd64` (AudioEnc with variant)
 - `odr-audioenc-next-full-ubuntu2404-arm64` (AudioEnc full variant)
-- `odr-dabmux-v5.4.1-ubuntu2404-amd64` (DabMux)
+- `odr-dabmux-v5.5.1-ubuntu2404-amd64` (DabMux)
 - `dablin-v1.16.1-cli-debian12-amd64` (DABlin CLI)
 - `dablin-v1.16.1-gtk-ubuntu2404-arm64` (DABlin GTK)
 - `dablin-v1.16.1-cli-macos-arm64` (DABlin macOS)
@@ -163,5 +163,5 @@ For reproducible setups, specify a version tag instead of `latest`:
 
 ```bash
 docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0 --help
-docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:v5.4.1 --help
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:v5.5.1 --help
 ```
