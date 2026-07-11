@@ -272,7 +272,6 @@ jobs:
         with:
           packages: odr-padenc,odr-audioenc-minimal,odr-audioenc-full,odr-dabmux
           validate: true
-          dry-run: true
 
   summary:
     needs: [prepare, build-and-push]
