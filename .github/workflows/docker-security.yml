@@ -34,7 +34,15 @@ jobs:
 
       - name: Load build environment
         id: env
-        run: grep '^ODR_.*_VERSION=' build.env >> "$GITHUB_OUTPUT"
+        # Source instead of grep: build.env values may use shell syntax,
+        # e.g. VERSION=dev-$(date +%Y%m%d) as documented in the file itself
+        run: |
+          . ./build.env
+          {
+            echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
+            echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
+            echo "ODR_DABMUX_VERSION=$ODR_DABMUX_VERSION"
+          } >> "$GITHUB_OUTPUT"
 
   security:
     name: ${{ matrix.image_name }}
