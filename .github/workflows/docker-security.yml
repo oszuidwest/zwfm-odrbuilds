@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       odr_padenc_version: ${{ steps.env.outputs.ODR_PADENC_VERSION }}
+      odr_audioenc_version: ${{ steps.env.outputs.ODR_AUDIOENC_VERSION }}
+      odr_dabmux_version: ${{ steps.env.outputs.ODR_DABMUX_VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -29,15 +31,42 @@ jobs:
           set -a
           . ./build.env
           set +a
-          echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION" >> "$GITHUB_OUTPUT"
+          {
+            echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
+            echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
+            echo "ODR_DABMUX_VERSION=$ODR_DABMUX_VERSION"
+          } >> "$GITHUB_OUTPUT"
 
   security:
+    name: ${{ matrix.image }}
     needs: env
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: odr-padenc
+            tool: odr-padenc
+            variant: ""
+            version_key: odr_padenc_version
+          - image: odr-audioenc-minimal
+            tool: odr-audioenc
+            variant: minimal
+            version_key: odr_audioenc_version
+          - image: odr-audioenc-full
+            tool: odr-audioenc
+            variant: full
+            version_key: odr_audioenc_version
+          - image: odr-dabmux
+            tool: odr-dabmux
+            variant: ""
+            version_key: odr_dabmux_version
     uses: oszuidwest/.github-templates/.github/workflows/docker-security-build.yml@main  # yamllint disable-line rule:line-length
     with:
       dockerfile-path: docker/Dockerfile
       build-args: |
-        TOOL=odr-padenc
-        VERSION=${{ needs.env.outputs.odr_padenc_version }}
+        TOOL=${{ matrix.tool }}
+        VERSION=${{ needs.env.outputs[matrix.version_key] }}
+        VARIANT=${{ matrix.variant }}
+      category: security-scan-${{ matrix.image }}
       event-name: ${{ github.event_name }}
       repository-private: ${{ github.event.repository.private }}
