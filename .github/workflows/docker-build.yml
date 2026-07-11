@@ -80,7 +80,7 @@ jobs:
             build_dabmux=${{ inputs.build_dabmux }}
           fi
 
-          # Build matrix array
+          # Build matrix array (keep the image list in sync with docker-security.yml's matrix)
           matrix_items=""
 
           if [ "$build_padenc" = "true" ]; then
@@ -257,6 +257,22 @@ jobs:
             echo "🔨 Built: ${{ matrix.image_name }}:${{ env.VERSION }}"
           fi
 
+  cleanup:
+    needs: build-and-push
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write
+    steps:
+      # Every push of a rebuilt or bumped image orphans the previous
+      # manifest set (manifest list + per-arch children) as untagged
+      # versions. This deletes only truly unreferenced manifests; arch
+      # children of tagged manifest lists are preserved.
+      - name: Delete orphaned untagged images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          packages: odr-padenc,odr-audioenc-minimal,odr-audioenc-full,odr-dabmux
+          validate: true
+
   summary:
     needs: [prepare, build-and-push]
     if: always()
@@ -266,11 +282,11 @@ jobs:
     steps:
       - name: Summary
         run: |
-          echo "## Docker Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Docker Build Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           if [ "${{ needs.prepare.outputs.matrix }}" = '{"include":[]}' ]; then
-            echo "No images were selected for building." >> $GITHUB_STEP_SUMMARY
+            echo "No images were selected for building." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Build completed. Check individual job outputs for details." >> $GITHUB_STEP_SUMMARY
+            echo "Build completed. Check individual job outputs for details." >> "$GITHUB_STEP_SUMMARY"
           fi
