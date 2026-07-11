@@ -4,11 +4,18 @@ name: Docker Security
 "on":
   push:
     branches: [main]
+    paths:
+      - docker/**
+      - build.env
+      - .github/workflows/docker-security.yml
   pull_request:
+    paths:
+      - docker/**
+      - build.env
+      - .github/workflows/docker-security.yml
   schedule:
     - cron: "0 4 * * 0"
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   contents: read
@@ -18,19 +25,19 @@ jobs:
   env:
     runs-on: ubuntu-latest
     outputs:
-      odr_padenc_version: ${{ steps.env.outputs.ODR_PADENC_VERSION }}
-      odr_audioenc_version: ${{ steps.env.outputs.ODR_AUDIOENC_VERSION }}
-      odr_dabmux_version: ${{ steps.env.outputs.ODR_DABMUX_VERSION }}
+      odr-padenc-version: ${{ steps.env.outputs.ODR_PADENC_VERSION }}
+      odr-audioenc-version: ${{ steps.env.outputs.ODR_AUDIOENC_VERSION }}
+      odr-dabmux-version: ${{ steps.env.outputs.ODR_DABMUX_VERSION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
       - name: Load build environment
         id: env
+        # Source instead of grep: build.env values may use shell syntax,
+        # e.g. VERSION=dev-$(date +%Y%m%d) as documented in the file itself
         run: |
-          set -a
           . ./build.env
-          set +a
           {
             echo "ODR_PADENC_VERSION=$ODR_PADENC_VERSION"
             echo "ODR_AUDIOENC_VERSION=$ODR_AUDIOENC_VERSION"
@@ -38,35 +45,32 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   security:
-    name: ${{ matrix.image }}
+    name: ${{ matrix.image_name }}
     needs: env
     strategy:
       fail-fast: false
       matrix:
+        # Keep in sync with the image list in docker-build.yml's "Set matrix" step
         include:
-          - image: odr-padenc
+          - image_name: odr-padenc
             tool: odr-padenc
             variant: ""
-            version_key: odr_padenc_version
-          - image: odr-audioenc-minimal
+          - image_name: odr-audioenc-minimal
             tool: odr-audioenc
             variant: minimal
-            version_key: odr_audioenc_version
-          - image: odr-audioenc-full
+          - image_name: odr-audioenc-full
             tool: odr-audioenc
             variant: full
-            version_key: odr_audioenc_version
-          - image: odr-dabmux
+          - image_name: odr-dabmux
             tool: odr-dabmux
             variant: ""
-            version_key: odr_dabmux_version
-    uses: oszuidwest/.github-templates/.github/workflows/docker-security-build.yml@main  # yamllint disable-line rule:line-length
+    uses: oszuidwest/.github-templates/.github/workflows/docker-security-build.yml@main
     with:
       dockerfile-path: docker/Dockerfile
       build-args: |
         TOOL=${{ matrix.tool }}
-        VERSION=${{ needs.env.outputs[matrix.version_key] }}
+        VERSION=${{ needs.env.outputs[format('{0}-version', matrix.tool)] }}
         VARIANT=${{ matrix.variant }}
-      category: security-scan-${{ matrix.image }}
+      category: security-scan-${{ matrix.image_name }}
       event-name: ${{ github.event_name }}
       repository-private: ${{ github.event.repository.private }}
