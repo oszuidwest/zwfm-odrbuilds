@@ -72,5 +72,10 @@ jobs:
         VERSION=${{ needs.env.outputs[format('{0}-version', matrix.tool)] }}
         VARIANT=${{ matrix.variant }}
       category: security-scan-${{ matrix.image_name }}
+      # next never gets a latest tag, see docker-build.yml.
+      published-image: >-
+        ghcr.io/oszuidwest/${{ matrix.image_name }}:${{
+          needs.env.outputs[format('{0}-version', matrix.tool)] == 'next' && 'next' || 'latest'
+        }}
       event-name: ${{ github.event_name }}
       repository-private: ${{ github.event.repository.private }}
