@@ -36,6 +36,13 @@ sync "ODR-AudioEnc" "$ODR_AUDIOENC_VERSION"
 sync "ODR-DabMux" "$ODR_DABMUX_VERSION"
 sync "DABlin" "$DABLIN_VERSION"
 
+# The audioenc images have no version in their README tag: docker-build.yml
+# publishes next while on next, and latest for a release.
+audioenc_tag=latest
+[ "$ODR_AUDIOENC_VERSION" = next ] && audioenc_tag=next
+sed -E -i.bak "s#(odr-audioenc-(minimal|full):)(latest|next)#\1${audioenc_tag}#g" README.md
+rm -f README.md.bak
+
 # Tripwire: every version-shaped token (v + dotted digits) left in the
 # README must be one of the build.env versions; anything else is a stale
 # reference the patterns above no longer reach. Requiring the dot keeps

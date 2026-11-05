@@ -139,8 +139,8 @@ Pre-built Docker images are available for ODR tools (except DABlin) on Debian 13
 
 ### Docker Image List
 - **ODR-PadEnc**: `ghcr.io/oszuidwest/odr-padenc:latest`
-- **ODR-AudioEnc (Minimal)**: `ghcr.io/oszuidwest/odr-audioenc-minimal:latest`
-- **ODR-AudioEnc (Full)**: `ghcr.io/oszuidwest/odr-audioenc-full:latest`
+- **ODR-AudioEnc (Minimal)**: `ghcr.io/oszuidwest/odr-audioenc-minimal:next`
+- **ODR-AudioEnc (Full)**: `ghcr.io/oszuidwest/odr-audioenc-full:next`
 - **ODR-DabMux**: `ghcr.io/oszuidwest/odr-dabmux:latest`
 
 ### Usage Examples
@@ -150,10 +150,10 @@ Pre-built Docker images are available for ODR tools (except DABlin) on Debian 13
 docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:latest --help
 
 # Run ODR-AudioEnc (minimal build)
-docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-minimal:latest --help
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-minimal:next --help
 
 # Run ODR-AudioEnc (full build)
-docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-full:latest --help
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-audioenc-full:next --help
 
 # Run ODR-DabMux
 docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:latest --help
