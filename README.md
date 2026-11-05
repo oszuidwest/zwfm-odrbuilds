@@ -1,6 +1,6 @@
 # ZuidWest FM ODR Builds
 This repository contains tooling to automate the building and releasing of binaries for the [Open Digital Radio](https://github.com/opendigitalradio) tools:
-- **ODR-PadEnc** (v3.1.0)
+- **ODR-PadEnc** (v3.1.0.1)
 - **ODR-AudioEnc** (next) - Built from the 'next' branch at ODR.
   - Minimal build (only piped input)
   - Full build (ALSA, Jack, GStreamer and VLC support)
@@ -80,9 +80,9 @@ The binaries are built for multiple operating systems and architectures:
 Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page of this repository. Each binary follows a naming convention that includes the tool name, version, operating system, and architecture:
 
 **Naming Examples:**
-- `odr-padenc-v3.1.0-debian12-amd64` (Debian 12)
-- `odr-padenc-v3.1.0-debian13-amd64` (Debian 13)
-- `odr-padenc-v3.1.0-ubuntu2404-amd64` (Ubuntu 24.04)
+- `odr-padenc-v3.1.0.1-debian12-amd64` (Debian 12)
+- `odr-padenc-v3.1.0.1-debian13-amd64` (Debian 13)
+- `odr-padenc-v3.1.0.1-ubuntu2404-amd64` (Ubuntu 24.04)
 - `odr-audioenc-next-minimal-debian12-amd64` (AudioEnc with variant)
 - `odr-audioenc-next-full-ubuntu2404-arm64` (AudioEnc full variant)
 - `odr-dabmux-v5.5.1-ubuntu2404-amd64` (DabMux)
@@ -95,14 +95,14 @@ Visit the [Releases](https://github.com/oszuidwest/zwfm-odrbuilds/releases) page
 ```bash
 #!/bin/bash
 # Download ODR-PadEnc binary for Debian 12 amd64
-wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-debian12-amd64 -O odr-padenc
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0.1/odr-padenc-v3.1.0.1-debian12-amd64 -O odr-padenc
 chmod +x odr-padenc
 
 # Run the tool
 ./odr-padenc --help
 
 # Or download Ubuntu 24.04 version
-wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0/odr-padenc-v3.1.0-ubuntu2404-amd64 -O odr-padenc
+wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/odr-padenc-v3.1.0.1/odr-padenc-v3.1.0.1-ubuntu2404-amd64 -O odr-padenc
 
 # Download DABlin CLI for Linux
 wget https://github.com/oszuidwest/zwfm-odrbuilds/releases/download/dablin-v1.16.1/dablin-v1.16.1-cli-ubuntu2404-amd64 -O dablin
@@ -150,6 +150,6 @@ docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:latest --help
 For reproducible setups, specify a version tag instead of `latest`:
 
 ```bash
-docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0 --help
+docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-padenc:v3.1.0.1 --help
 docker run --rm -v $(pwd):/data ghcr.io/oszuidwest/odr-dabmux:v5.5.1 --help
 ```
