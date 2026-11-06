@@ -74,11 +74,12 @@ jobs:
             arch: "arm64"
             runner: "ubuntu-24.04-arm"
     steps:
-      - name: Checkout repository (for build.env file)
+      - name: Checkout repository (for build.env and patches)
         uses: actions/checkout@v7
         with:
           sparse-checkout: |
             build.env
+            patches
           sparse-checkout-cone-mode: false
 
       - name: Load configuration
@@ -113,6 +114,11 @@ jobs:
             echo "Cloning branch ${BRANCH} from ${REPO_URL}"
             git clone --depth 1 --branch "${BRANCH}" "${REPO_URL}.git"
           fi
+
+      # Run from the repository root: inside a git work tree, git apply in a
+      # subdirectory silently skips the patch and still exits 0.
+      - name: Apply patches to ODR-PadEnc
+        run: git apply --verbose --directory=ODR-PadEnc patches/odr-padenc-utf8-log.patch
 
       - name: Build ODR-PadEnc
         working-directory: ODR-PadEnc
