@@ -219,7 +219,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}
           tags: |
             type=raw,value=${{ env.VERSION }}
-            ${{ env.VERSION != 'next' && 'type=raw,value=latest' || '' }}
+            type=raw,value=latest
           labels: |
             org.opencontainers.image.title=${{ matrix.tool }}${{
               matrix.variant && format(' ({0})', matrix.variant) || '' }}
