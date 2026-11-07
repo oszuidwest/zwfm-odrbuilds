@@ -41,7 +41,7 @@ jobs:
             # Skip if an open PR for this exact version already exists;
             # an open PR for an older version is force-pushed and retitled.
             # head= leaves out forks of other owners, the select a fork in this org.
-            existing=$(gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
+            existing=$(gh api --paginate --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
               -f state=open -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" \
               --jq 'map(select(.head.repo.full_name == env.GITHUB_REPOSITORY))[0] // empty | "\(.number) \(.title)"')
             if [ "${existing#* }" = "$title" ]; then
