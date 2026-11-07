@@ -40,10 +40,9 @@ jobs:
 
             # Skip if an open PR for this exact version already exists;
             # an open PR for an older version is force-pushed and retitled.
-            # A fork PR can use the same branch name, so it doesn't count.
-            existing=$(gh pr list --head "$branch" --state open \
-              --json number,title,isCrossRepository \
-              --jq 'map(select(.isCrossRepository | not))[0] // empty | "\(.number) \(.title)"')
+            # The owner in head= leaves out fork PRs on the same branch name.
+            existing=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&head=${GITHUB_REPOSITORY_OWNER}:${branch}" \
+              --jq '.[0] // empty | "\(.number) \(.title)"')
             if [ "${existing#* }" = "$title" ]; then
               echo "PR for ${tool} ${version} already open, skipping"
               continue
