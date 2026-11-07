@@ -203,6 +203,14 @@ jobs:
             echo "should_build=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Point latest at the existing version
+        if: >-
+          steps.decision.outputs.should_build == 'false' && steps.check_image.outputs.exists == 'true' &&
+          github.ref == 'refs/heads/main'
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}"
+          docker buildx imagetools create --tag "${IMAGE}:latest" "${IMAGE}:${{ env.VERSION }}"
+
       - name: Set up QEMU
         if: steps.decision.outputs.should_build == 'true'
         uses: docker/setup-qemu-action@v4
