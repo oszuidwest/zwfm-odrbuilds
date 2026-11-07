@@ -34,6 +34,12 @@ on:
     types:
       - completed
 
+# Every run can write latest, so they wait for each other. queue: max keeps
+# all waiting runs, because each one can select different images.
+concurrency:
+  group: docker-build
+  queue: max
+
 jobs:
   prepare:
     runs-on: ubuntu-24.04
