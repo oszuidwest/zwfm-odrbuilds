@@ -39,10 +39,12 @@ jobs:
             title="chore: update ${tool} to ${version}"
 
             # Skip if an open PR for this exact version already exists;
-            # an open PR for an older version is force-pushed and retitled
+            # an open PR for an older version is force-pushed and retitled.
+            # A fork PR can use the same branch name, so it doesn't count.
             existing=$(gh pr list --head "$branch" --state open \
-              --json title --jq '.[0].title // empty')
-            if [ "$existing" = "$title" ]; then
+              --json number,title,isCrossRepository \
+              --jq 'map(select(.isCrossRepository | not))[0] // empty | "\(.number) \(.title)"')
+            if [ "${existing#* }" = "$title" ]; then
               echo "PR for ${tool} ${version} already open, skipping"
               continue
             fi
@@ -63,7 +65,7 @@ jobs:
               "After merging, the build workflow is triggered automatically for this tool.")
 
             if [ -n "$existing" ]; then
-              gh pr edit "$branch" --title "$title" --body "$body"
+              gh pr edit "${existing%% *}" --title "$title" --body "$body"
               echo "Updated existing PR for ${tool} to ${version}"
             else
               gh pr create --base main --head "$branch" \
