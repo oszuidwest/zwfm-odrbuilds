@@ -269,6 +269,15 @@ jobs:
           packages: odr-padenc,odr-audioenc-minimal,odr-audioenc-full,odr-dabmux
           validate: true
 
+  # A version bump can only be scanned once its release and image exist, so
+  # docker-security.yml does not start on build.env changes but from here
+  security_scan:
+    needs: build-and-push
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/docker-security.yml
+
   summary:
     needs: [prepare, build-and-push]
     if: always()

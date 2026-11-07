@@ -938,6 +938,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
     uses: ./.github/workflows/docker-build.yml
     with:
       build_padenc: ${{ inputs.build_padenc }}
