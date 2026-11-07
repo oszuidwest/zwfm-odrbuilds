@@ -922,3 +922,25 @@ jobs:
           tag_name: dablin-${{ env.VERSION }}
           name: "DABlin ${{ env.VERSION }}"
           generate_release_notes: false
+
+  ##################################
+  # Docker images
+  ##################################
+  # Called directly: a workflow_run trigger does not fire after a run started
+  # with GITHUB_TOKEN, which is how build-on-version-change.yml starts this one
+  docker_images:
+    name: Docker images
+    needs: [release_padenc, release_audioenc, release_dabmux, release_dablin]
+    if: >-
+      ${{ github.ref == 'refs/heads/main' &&
+      (inputs.build_padenc || inputs.build_audioenc || inputs.build_dabmux) &&
+      !cancelled() && !failure() }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-build.yml
+    with:
+      build_padenc: ${{ inputs.build_padenc }}
+      build_audioenc_minimal: ${{ inputs.build_audioenc }}
+      build_audioenc_full: ${{ inputs.build_audioenc }}
+      build_dabmux: ${{ inputs.build_dabmux }}

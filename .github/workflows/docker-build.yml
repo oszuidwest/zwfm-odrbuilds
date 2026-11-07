@@ -29,10 +29,20 @@ on:
         required: false
         default: false
         type: boolean
-  workflow_run:
-    workflows: ["Build and Release ODR Artifacts"]
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      build_padenc:
+        required: true
+        type: boolean
+      build_audioenc_minimal:
+        required: true
+        type: boolean
+      build_audioenc_full:
+        required: true
+        type: boolean
+      build_dabmux:
+        required: true
+        type: boolean
 
 jobs:
   prepare:
@@ -61,24 +71,10 @@ jobs:
       - name: Set matrix
         id: set-matrix
         run: |
-          # Build matrix based on workflow inputs or defaults
-
-          # For workflow_run, build all by default
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
-              echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            build_padenc=true
-            build_audioenc_minimal=true
-            build_audioenc_full=true
-            build_dabmux=true
-          else
-            build_padenc=${{ inputs.build_padenc }}
-            build_audioenc_minimal=${{ inputs.build_audioenc_minimal }}
-            build_audioenc_full=${{ inputs.build_audioenc_full }}
-            build_dabmux=${{ inputs.build_dabmux }}
-          fi
+          build_padenc=${{ inputs.build_padenc }}
+          build_audioenc_minimal=${{ inputs.build_audioenc_minimal }}
+          build_audioenc_full=${{ inputs.build_audioenc_full }}
+          build_dabmux=${{ inputs.build_dabmux }}
 
           # Build matrix array (keep the image list in sync with docker-security.yml's matrix)
           matrix_items=""
