@@ -209,10 +209,31 @@ jobs:
             echo "should_build=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # An older run can get here after main has moved on, and it must not
+      # put latest back. A run from another branch never sets latest.
+      - name: Check whether this version may become latest
+        id: latest
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TOOL: ${{ matrix.tool }}
+        run: |
+          gh api -H 'Accept: application/vnd.github.raw+json' \
+            "repos/$GITHUB_REPOSITORY/contents/build.env?ref=main" > "$RUNNER_TEMP/main-build.env"
+          prefix=$(tr '[:lower:]-' '[:upper:]_' <<< "$TOOL")
+          key="${prefix}_VERSION"
+          current=$( . "$RUNNER_TEMP/main-build.env"; printf '%s' "${!key}" )
+          if [ "$VERSION" = "$current" ]; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Not setting latest: $VERSION differs from main ($current)"
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Point latest at the existing version
         if: >-
           steps.decision.outputs.should_build == 'false' && steps.check_image.outputs.exists == 'true' &&
-          github.ref == 'refs/heads/main'
+          steps.latest.outputs.allowed == 'true'
         run: |
           IMAGE="${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}"
           docker buildx imagetools create --tag "${IMAGE}:latest" "${IMAGE}:${{ env.VERSION }}"
@@ -233,7 +254,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.ORGANIZATION }}/${{ matrix.image_name }}
           tags: |
             type=raw,value=${{ env.VERSION }}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ steps.latest.outputs.allowed == 'true' }}
           labels: |
             org.opencontainers.image.title=${{ matrix.tool }}${{
               matrix.variant && format(' ({0})', matrix.variant) || '' }}
