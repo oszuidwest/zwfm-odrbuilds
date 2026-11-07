@@ -29,6 +29,20 @@ on:
         required: false
         default: false
         type: boolean
+  workflow_call:
+    inputs:
+      build_padenc:
+        required: true
+        type: boolean
+      build_audioenc_minimal:
+        required: true
+        type: boolean
+      build_audioenc_full:
+        required: true
+        type: boolean
+      build_dabmux:
+        required: true
+        type: boolean
 
 jobs:
   prepare:

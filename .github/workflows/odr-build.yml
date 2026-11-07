@@ -926,22 +926,21 @@ jobs:
   ##################################
   # Docker images
   ##################################
-  start_docker_build:
-    name: Start Docker build for the tools that were built
-    runs-on: ubuntu-24.04
+  # Called directly: a workflow_run trigger does not fire after a run started
+  # with GITHUB_TOKEN, which is how build-on-version-change.yml starts this one
+  docker_images:
+    name: Docker images
     needs: [release_padenc, release_audioenc, release_dabmux, release_dablin]
-    if: ${{ (inputs.build_padenc || inputs.build_audioenc || inputs.build_dabmux) && !cancelled() && !failure() }}
+    if: >-
+      ${{ github.ref == 'refs/heads/main' &&
+      (inputs.build_padenc || inputs.build_audioenc || inputs.build_dabmux) &&
+      !cancelled() && !failure() }}
     permissions:
-      actions: write
-    steps:
-      # A workflow_run trigger does not fire when this run was itself started
-      # with GITHUB_TOKEN, which is how build-on-version-change.yml starts it
-      - name: Start docker-build.yml
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run docker-build.yml --repo "$GITHUB_REPOSITORY" --ref main \
-            --field build_padenc=${{ inputs.build_padenc }} \
-            --field build_audioenc_minimal=${{ inputs.build_audioenc }} \
-            --field build_audioenc_full=${{ inputs.build_audioenc }} \
-            --field build_dabmux=${{ inputs.build_dabmux }}
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-build.yml
+    with:
+      build_padenc: ${{ inputs.build_padenc }}
+      build_audioenc_minimal: ${{ inputs.build_audioenc }}
+      build_audioenc_full: ${{ inputs.build_audioenc }}
+      build_dabmux: ${{ inputs.build_dabmux }}
